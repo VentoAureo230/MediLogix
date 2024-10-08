@@ -6,9 +6,17 @@ import { Observable } from 'rxjs';
   providedIn: 'root'
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:3000';
+  private apiUrl = 'http://localhost:3000/authentification';
 
   constructor(private http: HttpClient) { }
+
+  login(email:string, password: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/login`, { email, password });
+  }
+
+  register(email: string, password: string, firstName: string, lastName: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/register`, { email, password, firstName, lastName });
+  }
 
   // Exemple de méthode GET pour obtenir des données
   getData(): Observable<any> {
