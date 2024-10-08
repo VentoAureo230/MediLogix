@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv'
 import { ConfigService } from './services/config.service';
@@ -21,6 +22,16 @@ async function bootstrap() {
     credentials: true,
     methods: ['GET', 'PUT', 'OPTIONS', 'POST', 'DELETE'],
   });
+
+  const config = new DocumentBuilder()
+    .setTitle('API Documentation')
+    .setDescription('The API description')
+    .setVersion('1.0')
+    .addTag('user')
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+  SwaggerModule.setup('api', app, document);
+  
   await app.listen(parseInt(process.env.PORT) || 3000, '0.0.0.0');
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
