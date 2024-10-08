@@ -3,30 +3,6 @@ import { PrismaClient } from '@prisma/client';
 
 let prisma: PrismaClient;
 
-export function createPrismaClient() {
-    const prisma = new PrismaClient().$extends({
-        query: {
-            $allModels: {
-                async $allOperations({ args, query }) {
-                    await prisma.$connect();
-
-                    try {
-                        const result = await query(args);
-                        return result;
-                    } catch (error) {
-                        console.error('Database query error:', error);
-                        throw error;
-                    } finally {
-                        await prisma.$disconnect();
-                    }
-                },
-            },
-        },
-    });
-
-    return prisma;
-}
-
 @Injectable()
 export class PrismaService extends PrismaClient implements OnModuleInit, OnModuleDestroy {
 

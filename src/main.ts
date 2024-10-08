@@ -4,9 +4,8 @@ import * as dotenv from 'dotenv'
 import { ConfigService } from './services/config.service';
 
 async function bootstrap() {
-  dotenv.config() 
+  dotenv.config()
   const app = await NestFactory.create(AppModule);
-  await app.listen(3000);
   const configService = app.get(ConfigService);
   app.enableCors({
     origin: configService.corsOrigin,
@@ -22,6 +21,7 @@ async function bootstrap() {
     credentials: true,
     methods: ['GET', 'PUT', 'OPTIONS', 'POST', 'DELETE'],
   });
+  await app.listen(parseInt(process.env.PORT) || 3000, '0.0.0.0');
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
 bootstrap();

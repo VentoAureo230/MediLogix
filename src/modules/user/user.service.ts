@@ -3,18 +3,18 @@ import { PrismaService } from "src/services";
 
 @Injectable()
 export class UserService {
-    constructor(private prisma: PrismaService) {}
+    constructor(private prisma: PrismaService) { }
 
-    async createUser() {
+    async createUser(email: string, password: string, firstName: string, lastName: string) {
         const res = await this.prisma.user.create({
             data: {
-                userId: '123',
-                email: 'test@test.com',
-                password: 'Password123',
-                firstName: 'John',
-                lastName: 'Doe',
-                level: 'user',
-            }});
+                email: email,
+                password: password,
+                firstName: firstName,
+                lastName: lastName,
+                level: 'user'
+            }
+        });
         return res;
     }
 }
