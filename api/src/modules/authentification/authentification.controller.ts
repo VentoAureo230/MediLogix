@@ -39,6 +39,6 @@ export class AuthentificationController {
             throw new HttpException('Invalid password', HttpStatus.BAD_REQUEST);
         }
 
-        return user;
+        return !!user;
     }
 }

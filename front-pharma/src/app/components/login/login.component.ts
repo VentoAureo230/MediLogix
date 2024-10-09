@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-login',
@@ -20,7 +21,8 @@ export class LoginComponent implements OnInit {
   registerLastName: string = '';
 
   constructor(
-    private apiService: ApiService
+    private apiService: ApiService,
+    private router: Router
   ) { }
 
   ngOnInit(): void { }
@@ -29,6 +31,11 @@ export class LoginComponent implements OnInit {
     this.apiService.login(this.loginEmail, this.loginPassword).subscribe(
       (data) => {
         console.log(data);
+        if(data) {
+          this.router.navigate(['/home']);
+        } else {
+          alert('Invalid credentials');
+        }
       },
       (error) => {
         console.log(error);
