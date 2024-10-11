@@ -1,1 +1,52 @@
-<p>store works!</p>
+<div class="container mx-auto p-4 bg-base-200">
+    <div class="flex justify-left mb-4">
+        <button (click)="switchTab('medicament')" class="px-4 py-2 text-sm font-medium"
+            [ngClass]="{'bg-green-500 text-white': selectedTab === 'medicament', 'hover:bg-green-100': selectedTab !== 'medicament'}">
+            Médicament
+        </button>
+        <button (click)="switchTab('instrument')" class="px-4 py-2 text-sm font-medium"
+            [ngClass]="{'bg-green-500 text-white': selectedTab === 'instrument', 'hover:bg-green-100': selectedTab !== 'instrument'}">
+            Instrument médicaux
+        </button>
+    </div>
+
+    <div *ngIf="isLoading" class="text-center mb-4">Loading...</div>
+
+    <table *ngIf="!isLoading" class="min-w-full bg-white border border-gray-200">
+        <thead>
+            <tr>
+                <th class="py-2 border-b text-center px-4">Nom</th>
+                <th class="py-2 border-b">Catégorie</th>
+                <th class="py-2 border-b">Emplacement</th>
+                <th class="py-2 border-b">Ajouter Stock</th>
+                <th class="py-2 border-b">Quantité</th>
+                <th class="py-2 border-b">Statut</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr *ngFor="let item of paginatedItems">
+                <td class="py-2 border-b">{{ item.nom }}</td>
+                <td class="py-2 border-b">{{ item.categorie }}</td>
+                <td class="py-2 border-b">{{ item.emplacement }}</td>
+                <td class="py-2 border-b">
+                    <button (click)="addStock(item)"
+                        class="px-2 py-1 text-xs text-white bg-blue-500 rounded">Ajouter</button>
+                </td>
+                <td class="py-2 border-b">{{ item.quantite }}</td>
+                <td class="py-2 border-b text-center px-4">
+                    <span [ngClass]="getStockStatusClass(item.statut)" class="px-2 py-1 rounded">
+                        {{ item.statut }}
+                    </span>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+
+    <div class="flex justify-center mt-4">
+        <button (click)="previousPage()" [disabled]="currentPage === 1"
+            class="px-4 py-2 mr-2 bg-gray-200 rounded hover:bg-gray-300">Précédent</button>
+        <span>Page {{ currentPage }} sur {{ totalPages }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage === totalPages"
+            class="px-4 py-2 ml-2 bg-gray-200 rounded hover:bg-gray-300">Suivant</button>
+    </div>
+</div>

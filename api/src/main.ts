@@ -3,6 +3,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
 import * as dotenv from 'dotenv'
 import { ConfigService } from './services/config.service';
+import { WsAdapter } from '@nestjs/platform-ws';
 
 async function bootstrap() {
   dotenv.config()
@@ -32,6 +33,8 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
   
+  app.useWebSocketAdapter(new WsAdapter(app));
+
   await app.listen(parseInt(process.env.PORT) || 3000, '0.0.0.0');
   console.log(`Application is running on: ${await app.getUrl()}`);
 }

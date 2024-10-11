@@ -4,6 +4,7 @@ import { MedicationService } from "./medication.service";
 import { ConfigService, PrismaService } from "src/services";
 
 @Module({
+    controllers: [MedicationController],
     providers: [
         MedicationController,
         MedicationService,

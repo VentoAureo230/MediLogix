@@ -8,12 +8,29 @@ datasource db {
 }
 
 model User {
-  userId           String            @id@default(cuid())
-  email            String            @unique
-  password         String?
-  firstName        String
-  lastName         String
-  level            String
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime?
+  userId    String    @id @default(cuid())
+  email     String    @unique
+  password  String?
+  firstName String
+  lastName  String
+  level     String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime?
+}
+
+model cip_codes {
+  cip_code_id   Int         @id @default(autoincrement())
+  cip_code      String      @unique @db.VarChar(255)
+  medication_id Int
+  medications   medications @relation(fields: [medication_id], references: [medication_id], onDelete: Cascade, onUpdate: NoAction)
+}
+
+model medications {
+  medication_id Int         @id @default(autoincrement())
+  name          String      @unique @db.VarChar(255)
+  quantity      Int
+  availability  String      @db.VarChar(255)
+  category      String      @db.VarChar(255)
+  location      String      @db.VarChar(255)
+  cip_codes     cip_codes[]
 }
