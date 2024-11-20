@@ -17,7 +17,7 @@ jobs:
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.0.0' # Spécifiez la version de Flutter que vous souhaitez utiliser
+          flutter-version: '3.24.3' # Spécifiez la version de Flutter que vous souhaitez utiliser
 
       - name: Install dependencies
         working-directory: mobile
