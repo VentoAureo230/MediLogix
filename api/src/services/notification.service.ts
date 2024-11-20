@@ -6,7 +6,7 @@ export class NotificationService {
 
   handleNotification(payload: any) {
     this.httpService.post('http://localhost:5000/notify', payload).subscribe({
-      next: (response) => console.log('Notification sent to WebSocket server'),
+      next: () => console.log('Notification sent to WebSocket server'),
       error: (err) => console.error('Failed to notify WebSocket server', err),
     });
   }
