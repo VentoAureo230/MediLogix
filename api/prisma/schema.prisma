@@ -7,30 +7,94 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  userId    String    @id @default(cuid())
-  email     String    @unique
-  password  String?
-  firstName String
-  lastName  String
-  level     String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime?
+enum enum_hospital_role {
+  Admin
+  Doctor
+  Pharmacist
 }
 
-model cip_codes {
-  cip_code_id   Int         @id @default(autoincrement())
-  cip_code      String      @unique @db.VarChar(255)
-  medication_id Int
-  medications   medications @relation(fields: [medication_id], references: [medication_id], onDelete: Cascade, onUpdate: NoAction)
+enum enum_order_status {
+  New
+  Ongoing
+  Ready
+  Cancelled
 }
 
-model medications {
-  medication_id Int         @id @default(autoincrement())
-  name          String      @unique @db.VarChar(255)
-  quantity      Int
-  availability  String      @db.VarChar(255)
-  category      String      @db.VarChar(255)
-  location      String      @db.VarChar(255)
-  cip_codes     cip_codes[]
+model message {
+  sender_id    Int
+  receiver_id  Int
+  sent_at      DateTime
+  content     String
+  sender      user  @relation("SentMessages", fields: [sender_id], references: [id])
+  receiver    user  @relation("ReceivedMessages", fields: [receiver_id], references: [id])
+
+  @@id([sender_id, receiver_id, sent_at])
+}
+
+model user {
+  id        Int           @id @default(autoincrement())
+  email     String
+  password  String
+  role      enum_hospital_role
+  created_at DateTime      @default(now())
+  updated_at DateTime      @updatedAt
+  messagesSent     message[] @relation("SentMessages")
+  messagesReceived message[] @relation("ReceivedMessages")
+  orders           order[]
+}
+
+model order {
+  id        Int          @id @default(autoincrement())
+  user_id    Int
+  status    enum_order_status
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  user      user         @relation(fields: [user_id], references: [id])
+  references order_has_reference[]
+}
+
+model order_has_reference {
+  order_id    Int
+  reference_id Int
+  quantity   Int
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  order      order    @relation(fields: [order_id], references: [id])
+  reference  reference @relation(fields: [reference_id], references: [id])
+
+  @@id([order_id, reference_id])
+}
+
+model reference {
+  id        Int          @id @default(autoincrement())
+  name      String
+  cip7      String
+  cip13     String
+  quantity  Int
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  orders    order_has_reference[]
+  positions position[]
+}
+
+model position {
+  id          Int       @id @default(autoincrement())
+  map_id       Int
+  reference_id Int
+  x           Int
+  y           Int
+  created_at   DateTime  @default(now())
+  updated_at   DateTime  @updatedAt
+  map         map       @relation(fields: [map_id], references: [id])
+  reference   reference @relation(fields: [reference_id], references: [id])
+}
+
+model map {
+  id        Int          @id @default(autoincrement())
+  name      String
+  height    Int
+  width     Int
+  created_at DateTime     @default(now())
+  updated_at DateTime     @updatedAt
+  positions position[]
 }
