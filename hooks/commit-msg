@@ -1,0 +1,18 @@
+#!/bin/bash
+
+# Obtenir le message de commit
+commit_message=$(cat "$1")
+
+# Définir le regex pour les messages valides
+regex="^(feat|fix|docs|style|refactor|test|chore): [a-z].+$"
+
+# Vérifier si le message respecte le format attendu
+if [[ ! $commit_message =~ $regex ]]; then
+    echo "❌ Erreur : Le message de commit ne respecte pas la convention."
+    echo "✅ Format attendu : <type>: <description>"
+    echo "   - Types valides : feat, fix, docs, style, refactor, test, chore"
+    echo "   Exemple : feat: ajouter la fonctionnalité de connexion"
+    exit 1
+fi
+
+echo "✅ Message de commit valide."
