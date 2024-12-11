@@ -35,19 +35,4 @@ export class AuthenticationController {
   ) {
     return await this.authenticationService.login(email, password);
   }
-
-  @Get()
-  findAll() {
-    return this.authenticationService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.authenticationService.findOne(+id);
-  }
-
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.authenticationService.remove(+id);
-  }
 }

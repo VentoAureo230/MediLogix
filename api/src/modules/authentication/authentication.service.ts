@@ -1,16 +1,28 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from 'src/services';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { PasswordService } from 'src/services/password.service';
 import { JwtService } from 'src/services/jwt.service';
+import { enum_hospital_role } from '@prisma/client';
 
 @Injectable()
-export class AuthenticationService {
+export class AuthenticationService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     private readonly passwordService: PasswordService,
     private jwtService: JwtService
   ) { }
+
+  async onModuleInit() {
+    const admin = await this.prisma.user.findFirst({
+      where: {
+        email: 'ios@ios.fr'
+      }
+    });
+    if(!admin) {
+      await this.createAdminAccount();
+    }
+  }
 
   async createUser(createUserDto: CreateUserDto) {
     const res = await this.prisma.user.create({
@@ -50,15 +62,16 @@ export class AuthenticationService {
     return accessToken;
   }
 
-  findAll() {
-    return `This action returns all authentication`;
-  }
-
-  findOne(id: number) {
-    return `This action returns a #${id} authentication`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} authentication`;
+  async createAdminAccount() {
+    const hashedPassword = await this.passwordService.hashPassword('Password1&');
+    const admin = await this.prisma.user.create({
+      data: {
+        email: 'ios@ios.fr',
+        password: hashedPassword,
+        role: enum_hospital_role.Admin
+      }
+    });
+    console.log('Admin account created', admin);
+    return admin;
   }
 }

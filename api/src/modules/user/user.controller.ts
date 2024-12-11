@@ -8,8 +8,6 @@ import { CreateUserDto } from "./dto/create-user.dto";
 export class UserController {
     constructor(private userService: UserService) { }
 
-    
-
     @Get('users')
     @ApiOperation({ summary: 'Get all user' })
     async getAllUser() {
