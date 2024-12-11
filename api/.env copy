@@ -6,3 +6,7 @@
 
 DATABASE_URL="postgresql://user:password@localhost:5432/dbname?schema=schemaname"
 CORS_ORIGIN=*
+JWT_PRIVATE_KEY=
+JWT_PUBLIC_KEY=
+JWT_PASSPHRASE=
+JWT_EXPIRES_IN="1d"

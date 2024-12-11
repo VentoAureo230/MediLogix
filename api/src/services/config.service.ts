@@ -25,8 +25,8 @@ export class ConfigService {
         .valid('production', 'local', 'test')
         .default('local'),
       CORS_ORIGIN: Joi.string(),
-      JWT_PRIVATE_KEY: Joi.string(),
-      JWT_PUBLIC_KEY: Joi.string(),
+      JWT_PRIVATE_KEY: Joi.string().required(),
+      JWT_PUBLIC_KEY: Joi.string().required(),
       JWT_PASSPHRASE: Joi.string(),
       JWT_EXPIRES_IN: Joi.string(),
     }).unknown(true);

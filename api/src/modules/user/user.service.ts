@@ -11,21 +11,11 @@ export class UserService {
             data: {
                 email: createUserDto.email,
                 password: createUserDto.password,
-                firstName: createUserDto.firstName,
-                lastName: createUserDto.lastName,
-                level: 'user'
+                role: createUserDto.role
             }
         });
         return res;
     }
-
-    async findOneByEmail(email: string) {
-        return this.prisma.user.findUnique({
-          where: {
-            email,
-          },
-        });
-      }
 
     async getAllUser() {
         return await this.prisma.user.findMany();
