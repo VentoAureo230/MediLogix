@@ -9,6 +9,9 @@ regex="^(feature|bugfix|hotfix|release)\/[a-z0-9_\-]+$"
 # Exclure les branches "main" et "develop"
 if [[ "$branch_name" == "main" || "$branch_name" == "develop" ]]; then
     echo "✅ La branche '$branch_name' est une branche autorisée et ne nécessite pas de vérification."
+    echo "Si ce message s'affiche, vérifier le format de la branch ou le format du commit"
+    echo "Format de la branch -> feature/ajout-login"
+    echo "Format du commit -> [feat|fix|docs|style|refactor|test|chore]: message --- exemple: [feat: ajout login], faite bien attention à l'espace entre le type le \":\" et le message"
     exit 0
 fi
 
