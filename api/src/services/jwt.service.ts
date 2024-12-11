@@ -6,7 +6,7 @@ import { ConfigService } from './config.service';
 export class JwtService {
   constructor(private configService: ConfigService) {}
 
-  async generateToken(userId: string): Promise<string> {
+  async generateToken(userId: number): Promise<string> {
     const privateKey = {
       key: this.configService.jwtPrivateKey,
       passphrase: this.configService.jwtPassphrase,

@@ -33,7 +33,7 @@ model message {
 
 model user {
   id               Int                @id @default(autoincrement())
-  email            String
+  email            String             @unique
   password         String
   role             enum_hospital_role
   created_at       DateTime           @default(now())
@@ -62,7 +62,7 @@ model order_has_reference {
   order        order     @relation(fields: [order_id], references: [id])
   reference    reference @relation(fields: [reference_id], references: [id])
 
-  @@id([order_id, reference_id])
+  @@id([order_id, reference_id, created_at])
 }
 
 model reference {

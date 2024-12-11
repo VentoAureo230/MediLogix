@@ -21,7 +21,7 @@ async function bootstrap() {
     ],
     exposedHeaders: 'Authorization',
     credentials: true,
-    methods: ['GET', 'PUT', 'OPTIONS', 'POST', 'DELETE'],
+    methods: ['GET', 'PUT', 'PATCH' ,'OPTIONS', 'POST', 'DELETE'],
   });
 
   const config = new DocumentBuilder()
@@ -37,5 +37,6 @@ async function bootstrap() {
 
   await app.listen(parseInt(process.env.PORT) || 3000, '0.0.0.0');
   console.log(`Application is running on: ${await app.getUrl()}`);
+  console.log(`Swagger is running on: ${await app.getUrl()}/api`);
 }
 bootstrap();
