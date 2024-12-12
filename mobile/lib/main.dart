@@ -10,7 +10,7 @@ import 'package:provider/provider.dart';
 import 'routing/app_route_config.dart';
 
 class Main extends StatefulWidget {
-  const Main({Key? key}) : super(key: key);
+  const Main({super.key});
 
   @override
   State<Main> createState() => _MainState();

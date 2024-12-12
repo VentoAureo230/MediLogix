@@ -13,11 +13,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      # Installer Flutter
       - name: Install Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.3' # Spécifiez la version de Flutter que vous souhaitez utiliser
+          flutter-version: '3.24.3'
+
+      - name: Set up environment variables
+        working-directory: mobile
+        env:
+          API_URL_ANDROID: ${{ secrets.API_URL_ANDROID }}
+          API_URL_IOS: ${{ secrets.API_URL_IOS }}
+        run: | 
+          echo "API_URL_ANDROID=$API_URL_ANDROID" >> $GITHUB_ENV 
+          echo "API_URL_IOS=$API_URL_IOS" >> $GITHUB_ENV
 
       - name: Install dependencies
         working-directory: mobile
@@ -32,9 +40,6 @@ jobs:
         working-directory: mobile
         run: flutter analyze
 
-      # Your project will need to have tests in test/ and a dependency on
-      # package:test for this step to succeed. Note that Flutter projects will
-      # want to change this to 'flutter test'.
       - name: Run tests
         working-directory: mobile
         run: flutter test
