@@ -70,3 +70,49 @@ jobs:
         working-directory: mobile
         run: flutter test
         continue-on-error: true
+  
+  #build_android:
+  #  runs-on: ubuntu-latest
+  #  needs: test
+#
+  #  steps:
+  #    - uses: actions/checkout@v4
+  #    - name: Build project
+  #      working-directory: mobile
+  #      run: flutter build appbundle
+  #
+  #upload_android:
+  #  runs-on: ubuntu-latest
+  #  needs: build_android
+#
+  #  steps:
+  #    - name: Upload to Google Play
+  #      uses: r0adkll/upload-google-play@v1
+  #      with:
+  #        serviceAccountJson: ${{ secrets.GOOGLE_PLAY_SERVICE_ACCOUNT_JSON }}
+  #        packageName: ${{ secrets.PACKAGE_NAME }}
+  #        releaseFile: mobile/build/app/outputs/bundle/release/app-release.aab
+  #        track: internal
+  #
+  #build_ios:
+  #  runs-on: ubuntu-latest
+  #  needs: test
+#
+  #  steps:
+  #    - uses: actions/checkout@v4
+  #    - name: Build project
+  #      working-directory: mobile
+  #      run: flutter build ios --release --no-codesign
+#
+  #upload_ios:
+  #  runs-on: ubuntu-latest
+  #  needs: build_ios
+#
+  #  steps:
+  #    - name: 'Upload app to TestFlight'
+  #      uses: apple-actions/upload-testflight-build@v1
+  #      with: 
+  #        app-path: 'path/to/application.ipa' 
+  #        issuer-id: ${{ secrets.APPSTORE_ISSUER_ID }}
+  #        api-key-id: ${{ secrets.APPSTORE_API_KEY_ID }}
+  #        api-private-key: ${{ secrets.APPSTORE_API_PRIVATE_KEY }}
