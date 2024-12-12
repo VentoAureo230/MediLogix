@@ -3,6 +3,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
+import 'package:mobile/widget/api_singleton.dart';
 import 'package:mobile/widget/restart_widget.dart';
 import 'package:provider/provider.dart';
 
@@ -68,10 +69,11 @@ Future<void> main() async {
   await dotenv.load(fileName: ".env");
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   RestartWidget restartWidget = const RestartWidget(child: Main());
+  await ApiSingleton().init();
   runApp(
     MultiProvider(
       providers: [
-        // Declare all providers here
+        ChangeNotifierProvider(create: (context) => null), // This is a dumb provider, please fill it with actual provider
       ],
       child: restartWidget,
     ),

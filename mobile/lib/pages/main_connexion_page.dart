@@ -10,6 +10,17 @@ class MainConnexionPage extends StatefulWidget {
 class _MainConnexionPageState extends State<MainConnexionPage> {
   @override
   Widget build(BuildContext context) {
-    return const Placeholder();
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Connexion'),
+      ),
+      body: const SingleChildScrollView(
+        child: Column(
+          children: [
+            Text('Hello !'),
+          ],
+        ),
+      ),
+    );
   }
 }
