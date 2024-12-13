@@ -12,7 +12,7 @@ export class InfoController {
     schema: {
       example: {
         name: 'Medilogix API',
-        version: '1.0.0',
+        version: '1.2.1',
       },
     },
   })
@@ -20,7 +20,7 @@ export class InfoController {
     return {
       name: 'Medilogix API',
       // Version is modified by version script, no need to modify anything here.
-      version: '1.0.0',
+      version: '1.2.1',
     };
   }
 }
