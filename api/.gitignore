@@ -4,3 +4,5 @@ package-lock.json
 dist
 .env
 .vscode
+build_command.sh
+bump_version.sh
