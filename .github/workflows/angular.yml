@@ -3,8 +3,12 @@ name: Angular CI
 on:
   push:
     branches: [ "main" ]
+    paths:
+      - 'front-pharma/**'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - 'front-pharma/**'
 
 jobs:
   checkout:
