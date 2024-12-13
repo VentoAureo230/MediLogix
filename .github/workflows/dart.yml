@@ -35,8 +35,8 @@ jobs:
           API_URL_ANDROID: ${{ secrets.API_URL_ANDROID }}
           API_URL_IOS: ${{ secrets.API_URL_IOS }}
         run: | 
-          echo "API_URL_ANDROID=${{ secrets.API_URL_ANDROID }}" >> mobile/.env
-          echo "API_URL_IOS=${{ secrets.API_URL_IOS }}" >> mobile/.env
+          echo "API_URL_ANDROID=${{ secrets.API_URL_ANDROID }}" >> .env
+          echo "API_URL_IOS=${{ secrets.API_URL_IOS }}" >> .env
 
   install_dependencies:
     runs-on: ubuntu-latest
