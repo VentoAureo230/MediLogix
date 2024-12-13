@@ -44,4 +44,4 @@ else
   exit 1
 fi
 
-open https://api-cloudrun-service-83c4e10-huro5ov5za-od.a.run.app/info
+open https://api-cloudrun-service-425c78f25-45150034295.europe-west9.run.app/info
