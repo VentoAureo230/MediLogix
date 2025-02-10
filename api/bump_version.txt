@@ -1,0 +1,47 @@
+#!/bin/bash
+
+# Read current version
+version=$(cat version.txt)
+
+# Split text
+IFS='.' read -r -a versionParts <<< "$version"
+
+major=${versionParts[0]}
+minor=${versionParts[1]}
+patch=${versionParts[2]}
+
+# Check increment type
+if [ "$1" == "major" ]; then
+  major=$((major + 1))
+  minor=0
+  patch=0
+elif [ "$1" == "minor" ]; then
+  minor=$((minor + 1))
+  patch=0
+elif [ "$1" == "hotfix" ]; then
+  patch=$((patch + 1))
+else
+  echo "Erreur: Type not specified. Please use 'major', 'minor' or 'hotfix'."
+  exit 1
+fi
+
+# Build new version
+newVersion="$major.$minor.$patch"
+
+# Update version file
+echo $newVersion > version.txt
+
+# Update version in info controller
+sed -i '' "s/version: '.*'/version: '$newVersion'/" src/modules/info/info.controller.ts
+
+echo "Version mise à jour vers $newVersion"
+
+# Build cmd file
+if [ -f ./build_command.sh ]; then
+  source ./build_command.sh
+else
+  echo "Error: build_commands.sh not found. Please create it with the necessary build commands."
+  exit 1
+fi
+
+open https://api-cloudrun-service-425c78f25-45150034295.europe-west9.run.app/info

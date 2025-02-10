@@ -1,0 +1,14 @@
+# build_command.sh
+
+# Build image with tags
+docker [...]
+
+# Push Docker image to GCR
+docker push [...]
+
+# Optionally tag the image with the new version and push it
+# docker tag [...] [...] 
+# docker push [...]
+
+# Deploy the new image to Cloud Run
+[...]
