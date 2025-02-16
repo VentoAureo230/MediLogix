@@ -9,7 +9,7 @@ export class JwtService {
   async generateToken(userId: number): Promise<string> {
     const privateKey = {
       key: this.configService.jwtPrivateKey,
-      passphrase: this.configService.jwtPassphrase,
+      //passphrase: this.configService.jwtPassphrase,
     };
     return jwt.sign({ userId }, privateKey, {
       expiresIn: this.configService.jwtExpiresIn,

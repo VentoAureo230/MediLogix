@@ -45,7 +45,7 @@ export class AuthenticationService implements OnModuleInit {
       return { message: 'User not found' }
     }
 
-    const isPasswordValid = await this.passwordService.checkHash(password, user.password);
+    const isPasswordValid = await this.passwordService.checkHash(user.password, password);
     if(!isPasswordValid) {
       throw new HttpException('Invalid password', HttpStatus.BAD_REQUEST);
     }

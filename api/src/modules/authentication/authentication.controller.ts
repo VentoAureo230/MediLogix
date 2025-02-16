@@ -14,7 +14,7 @@ export class AuthenticationController {
   }
 
   @Post('login')
-  @ApiOperation({ summary: 'Login a user', description: 'Logs in a user to the Noctua system.' })
+  @ApiOperation({ summary: 'Login a user', description: 'Logs in a user to the Medilogix system.' })
   @ApiHeader({ name: 'Content-Type', description: 'Content-Type header', required: true, example: 'application/json' })
   @ApiBody({
     description: 'User login data',
@@ -27,7 +27,7 @@ export class AuthenticationController {
     },
   })
   @ApiResponse({ status: 200, description: 'User logged in successfully', schema: { example: { userId: 'uuid', token: 'jwt-token' } } })
-  @ApiResponse({ status: 404, description: 'No such user' })
+  @ApiResponse({ status: 201, description: 'User not found' })
   @ApiResponse({ status: 400, description: 'Invalid password' })
   async login(
     @Body('email') email: string,
