@@ -19,7 +19,7 @@ class _MainConnexionPageState extends State<MainConnexionPage> {
             const Text('Connexion page'),
             const Text('This is the connexion page'),
             ElevatedButton(onPressed : () {
-              context.go('/scanner'); 
+              context.goNamed('scanner'); 
             },
             child: const Text('Scanner un médicament'))
           ],
