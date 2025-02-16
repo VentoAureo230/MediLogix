@@ -64,6 +64,9 @@ class _MainState extends State<Main> {
   }
 }
 
+class FakeProvider extends ChangeNotifier {
+}
+
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
@@ -73,7 +76,7 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (context) => null), // This is a dumb provider, please fill it with actual provider
+        ChangeNotifierProvider(create: (context) => FakeProvider()), // Empty provider to avoid bug
       ],
       child: restartWidget,
     ),

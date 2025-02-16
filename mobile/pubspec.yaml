@@ -42,6 +42,9 @@ dependencies:
   flutter_dotenv: ^5.2.1
   flutter_native_splash: ^2.4.3
   dio: ^5.7.0
+  mobile_scanner: ^3.2.0
+  csv: ^5.0.0
+  collection: ^1.17.1
 
 dev_dependencies:
   flutter_test:
@@ -61,6 +64,7 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
+    - assets/medicaments.csv
     - .env
   #  - .env.prod
     

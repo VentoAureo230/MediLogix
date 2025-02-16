@@ -55,7 +55,7 @@ export class ConfigService {
     return String(this.envConfig.JWT_PASSPHRASE);
   }
 
-  get jwtExpiresIn(): string {
-    return String(this.envConfig.JWT_EXPIRES_IN);
+  get jwtExpiresIn(): number {
+    return parseInt(this.envConfig.JWT_EXPIRES_IN);
   }
 }
