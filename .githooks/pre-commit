@@ -1,0 +1,48 @@
+#!/bin/bash
+
+# =============================================================================
+# pre-commit hook — Validate email and branch naming convention
+# =============================================================================
+
+# --- Check professional email ---
+email=$(git config user.email)
+
+# --- Check branch naming convention ---
+branch_name=$(git rev-parse --abbrev-ref HEAD)
+
+# Allow protected branches and Release Please branches
+if [[ "$branch_name" == "main" || "$branch_name" == "development" || "$branch_name" == "staging" ]]; then
+    echo "✅ Branch '$branch_name' is a protected branch — skipping naming check."
+    exit 0
+fi
+
+## Allow Release Please auto-generated branches
+#if [[ "$branch_name" =~ ^release-please-- ]]; then
+#    echo "✅ Release Please branch detected — skipping naming check."
+#    exit 0
+#fi
+#
+## Allow Aikido auto-generated branches
+#if [[ "$branch_name" =~ ^fix/aikido- ]]; then
+#    echo "✅ Aikido branch detected — skipping naming check."
+#    exit 0
+#fi
+
+# Enforce convention: username/description
+regex="^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$"
+
+if [[ ! $branch_name =~ $regex ]]; then
+    echo ""
+    echo "❌ ERROR: Branch name '$branch_name' does not follow the naming convention."
+    echo ""
+    echo "   Expected format: <username>/<description>"
+    echo ""
+    echo "   Examples:"
+    echo "     anthonymeny/noc-102-add-login"
+    echo "     anthonymeny/noc-103-fix-display"
+    echo "     anthonymeny/noc-104-hotfix-crash"
+    echo ""
+    exit 1
+else
+    echo "✅ Branch name '$branch_name' follows the naming convention."
+fi

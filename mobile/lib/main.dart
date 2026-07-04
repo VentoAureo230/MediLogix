@@ -4,7 +4,6 @@ import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:mobile/service/api_singleton.dart';
-import 'package:mobile/widget/restart_widget.dart';
 import 'package:provider/provider.dart';
 
 import 'routing/app_route_config.dart';
@@ -71,14 +70,13 @@ Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   await dotenv.load(fileName: ".env");
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  RestartWidget restartWidget = const RestartWidget(child: Main());
   await ApiSingleton().init();
   runApp(
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => FakeProvider()), // Empty provider to avoid bug
       ],
-      child: restartWidget,
+      child: const Main(),
     ),
   );
   FlutterNativeSplash.remove();

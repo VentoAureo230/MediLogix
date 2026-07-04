@@ -1,0 +1,44 @@
+#!/bin/bash
+
+# =============================================================================
+# pre-push hook — Validate branch naming convention before push
+# =============================================================================
+
+branch_name=$(git rev-parse --abbrev-ref HEAD)
+
+# Allow protected branches
+if [[ "$branch_name" == "main" || "$branch_name" == "development" || "$branch_name" == "staging" ]]; then
+    echo "✅ Branch '$branch_name' is a protected branch — push allowed."
+    exit 0
+fi
+
+## Allow Release Please auto-generated branches
+#if [[ "$branch_name" =~ ^release-please-- ]]; then
+#    echo "✅ Release Please branch detected — push allowed."
+#    exit 0
+#fi
+#
+## Allow Aikido auto-generated branches
+#if [[ "$branch_name" =~ ^fix/aikido- ]]; then
+#    echo "✅ Aikido branch detected — push allowed."
+#    exit 0
+#fi
+
+# Enforce convention: username/noc-XXX-description
+regex="^[a-zA-Z0-9_-]+/[a-zA-Z0-9_-]+$"
+
+if [[ ! $branch_name =~ $regex ]]; then
+    echo ""
+    echo "❌ ERROR: Branch name '$branch_name' does not follow the naming convention."
+    echo ""
+    echo "   Expected format: <username>/<description>"
+    echo ""
+    echo "   Examples:"
+    echo "     anthonymeny/add-login"
+    echo "     anthonymeny/fix-display"
+    echo "     anthonymeny/hotfix-crash"
+    echo ""
+    exit 1
+else
+    echo "✅ Branch name '$branch_name' follows the convention — push allowed."
+fi

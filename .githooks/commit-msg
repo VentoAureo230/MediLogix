@@ -1,0 +1,54 @@
+#!/bin/bash
+
+# =============================================================================
+# commit-msg hook — Enforce Conventional Commits format for Release Please
+# =============================================================================
+# Format: <type>(<scope>): <description>
+#   or:   <type>: <description>
+#   or:   <type>(<scope>)!: <description>  (breaking change)
+#
+# Valid types: feat, fix, docs, style, refactor, test, chore, build, ci, perf
+# Valid scopes: api, front-pharma, mobile (all optional).
+# =============================================================================
+
+commit_message=$(cat "$1")
+
+# Allow merge commits and reverts
+merge_regex="^(Merge|Revert) .+"
+if [[ $commit_message =~ $merge_regex ]]; then
+    echo "✅ Merge/Revert commit detected — skipping validation."
+    exit 0
+fi
+
+# Allow Release Please automated commits
+release_please_regex="^chore\(main\): release"
+if [[ $commit_message =~ $release_please_regex ]]; then
+    echo "✅ Release Please commit detected — skipping validation."
+    exit 0
+fi
+
+# Conventional Commits regex
+# Matches: type(scope)!: description  OR  type!: description  OR  type(scope): description  OR  type: description
+conventional_regex="^(feat|fix|docs|style|refactor|test|chore|build|ci|perf)(\([a-z-]+\))?!?: .+"
+
+if [[ ! $commit_message =~ $conventional_regex ]]; then
+    echo ""
+    echo "❌ ERROR: Commit message does not follow Conventional Commits format."
+    echo ""
+    echo "   Expected format: <type>(<scope>): <description>"
+    echo ""
+    echo "   Valid types: feat, fix, docs, style, refactor, test, chore, build, ci, perf"
+    echo "   Valid scopes (optional): api, front-pharma, mobile"
+    echo ""
+    echo "   Examples:"
+    echo "     feat(api): add new health tracking endpoint"
+    echo "     fix(mobile): resolve crash on login screen"
+    echo "     chore(api): update Cloud Run configuration"
+    echo "     docs: update README"
+    echo "     feat(api)!: redesign authentication flow (BREAKING)"
+    echo ""
+    exit 1
+fi
+
+echo "✅ Commit message is valid."
+exit 0

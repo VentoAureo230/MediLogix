@@ -27,7 +27,7 @@ export class ConfigService {
       CORS_ORIGIN: Joi.string(),
       JWT_PRIVATE_KEY: Joi.string().required(),
       JWT_PUBLIC_KEY: Joi.string().required(),
-      JWT_PASSPHRASE: Joi.string(),
+      JWT_PASSPHRASE: Joi.string().allow(''),
       JWT_EXPIRES_IN: Joi.string(),
     }).unknown(true);
 
