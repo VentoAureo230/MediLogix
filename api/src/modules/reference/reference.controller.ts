@@ -1,13 +1,37 @@
-import { Body, Controller, Get, Param, Patch, Post } from '@nestjs/common';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { ReferenceService } from './reference.service';
 import { CreateReferenceDto } from './dto/create-reference.dto';
 import { UpdateReferenceDto } from './dto/update-reference.dto';
+import { AuthGuardService } from 'src/services/auth-guard.service';
 
 @ApiTags('reference')
+@ApiBearerAuth()
+@UseGuards(AuthGuardService)
 @Controller('reference')
 export class ReferenceController {
   constructor(private referenceService: ReferenceService) {}
+
+  @Get()
+  @ApiOperation({ summary: 'List references (paginated)' })
+  async listReferences(
+    @Query('page') page?: string,
+    @Query('limit') limit?: string,
+  ) {
+    return await this.referenceService.findAll(
+      page ? parseInt(page, 10) : undefined,
+      limit ? parseInt(limit, 10) : undefined,
+    );
+  }
 
   @Get(':cip13')
   @ApiOperation({ summary: 'Get reference by cip13' })

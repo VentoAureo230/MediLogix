@@ -1,8 +1,11 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
-import { ApiOperation, ApiTags } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { AuthGuardService } from 'src/services/auth-guard.service';
 
 @ApiTags('user')
+@ApiBearerAuth()
+@UseGuards(AuthGuardService)
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}

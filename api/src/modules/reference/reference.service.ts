@@ -13,6 +13,20 @@ export class ReferenceService {
     private notificationService: NotificationService,
   ) {}
 
+  async findAll(page = 1, limit = 15) {
+    const safePage = page > 0 ? page : 1;
+    const safeLimit = limit > 0 ? limit : 15;
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.reference.findMany({
+        skip: (safePage - 1) * safeLimit,
+        take: safeLimit,
+        orderBy: { id: 'asc' },
+      }),
+      this.prisma.reference.count(),
+    ]);
+    return { data, total, page: safePage, limit: safeLimit };
+  }
+
   async getByCip13(cip13: string) {
     return await this.prisma.reference.findFirst({ where: { cip13 } });
   }

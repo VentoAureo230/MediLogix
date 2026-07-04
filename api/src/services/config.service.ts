@@ -55,7 +55,9 @@ export class ConfigService {
     return String(this.envConfig.JWT_PASSPHRASE);
   }
 
-  get jwtExpiresIn(): number {
-    return parseInt(this.envConfig.JWT_EXPIRES_IN);
+  // Returned as-is (e.g. "1d") so jsonwebtoken parses the duration string.
+  // parseInt("1d") === 1 would mean a 1-SECOND token (numeric expiresIn = seconds).
+  get jwtExpiresIn(): string {
+    return String(this.envConfig.JWT_EXPIRES_IN);
   }
 }

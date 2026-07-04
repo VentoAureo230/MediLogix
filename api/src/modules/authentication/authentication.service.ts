@@ -30,10 +30,13 @@ export class AuthenticationService implements OnModuleInit {
   }
 
   async createUser(createUserDto: CreateUserDto) {
+    const hashedPassword = await this.passwordService.hashPassword(
+      createUserDto.password,
+    );
     const res = await this.prisma.user.create({
       data: {
         email: createUserDto.email,
-        password: createUserDto.password,
+        password: hashedPassword,
         role: createUserDto.role,
       },
     });
