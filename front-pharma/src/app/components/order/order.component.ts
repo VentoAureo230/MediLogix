@@ -1,12 +1,20 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { OrderService } from '../../services/order.service';
 import { Order } from '../../models/order.model';
+
+const STATUS_ORDER: Record<string, number> = {
+  New: 0,
+  Ongoing: 1,
+  Ready: 2,
+  Cancelled: 3,
+};
 
 @Component({
   selector: 'app-order',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './order.component.html',
   styleUrl: './order.component.css',
 })
@@ -18,6 +26,7 @@ export class OrderComponent implements OnInit {
   totalPages = 1;
   isLoading = false;
   expandedOrderId: number | null = null;
+  readonly statuses = ['New', 'Ongoing', 'Ready', 'Cancelled'];
 
   constructor(private orderService: OrderService) {}
 
@@ -46,6 +55,30 @@ export class OrderComponent implements OnInit {
 
   toggleOrder(id: number): void {
     this.expandedOrderId = this.expandedOrderId === id ? null : id;
+  }
+
+  changeStatus(order: Order, newStatus: string): void {
+    if (newStatus === order.status) {
+      return;
+    }
+    const previous = order.status;
+    order.status = newStatus; // optimistic
+    this.orderService.updateStatus(order.id, newStatus).subscribe({
+      next: () => this.resort(),
+      error: () => {
+        order.status = previous;
+        alert('Échec de la mise à jour du statut');
+      },
+    });
+  }
+
+  // Keep the list consistent with the API sort (New > Ongoing > Ready > Cancelled)
+  // after a status change, without a full refetch.
+  private resort(): void {
+    this.orders.sort(
+      (a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99),
+    );
+    this.updatePagination();
   }
 
   nextPage(): void {
