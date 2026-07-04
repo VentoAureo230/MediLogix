@@ -1,5 +1,8 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { Subject, Subscription } from 'rxjs';
+import { debounceTime, distinctUntilChanged } from 'rxjs/operators';
 import { ReferenceService } from '../../services/reference.service';
 import { WebSocketService } from '../../services/websocket.service';
 import { Reference } from '../../models/reference.model';
@@ -14,7 +17,7 @@ interface Item {
 @Component({
   selector: 'app-store',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, FormsModule],
   templateUrl: './store.component.html',
   styleUrl: './store.component.css',
 })
@@ -25,7 +28,10 @@ export class StoreComponent implements OnInit, OnDestroy {
   totalPages = 1;
   total = 0;
   isLoading = false;
+  searchTerm = '';
 
+  private search$ = new Subject<string>();
+  private searchSub?: Subscription;
   private wsUnsubscribe?: () => void;
 
   constructor(
@@ -35,6 +41,12 @@ export class StoreComponent implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     this.loadPage(1);
+
+    // Debounce keystrokes so we don't hit the API on every character.
+    this.searchSub = this.search$
+      .pipe(debounceTime(300), distinctUntilChanged())
+      .subscribe(() => this.loadPage(1));
+
     // A new reference created anywhere → refresh the current page.
     this.wsUnsubscribe = this.websocketService.onNewMedication(() => {
       this.loadPage(this.currentPage);
@@ -43,22 +55,34 @@ export class StoreComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.wsUnsubscribe?.();
+    this.searchSub?.unsubscribe();
+  }
+
+  onSearchChange(): void {
+    this.search$.next(this.searchTerm);
   }
 
   loadPage(page: number): void {
     this.isLoading = true;
-    this.referenceService.getReferences(page, this.itemsPerPage).subscribe({
-      next: (res) => {
-        this.items = res.data.map((ref) => this.toItem(ref));
-        this.total = res.total;
-        this.currentPage = res.page;
-        this.totalPages = Math.max(1, Math.ceil(res.total / res.limit));
-        this.isLoading = false;
-      },
-      error: () => {
-        this.isLoading = false;
-      },
-    });
+    this.referenceService
+      .getReferences(
+        page,
+        this.itemsPerPage,
+        undefined,
+        this.searchTerm.trim() || undefined,
+      )
+      .subscribe({
+        next: (res) => {
+          this.items = res.data.map((ref) => this.toItem(ref));
+          this.total = res.total;
+          this.currentPage = res.page;
+          this.totalPages = Math.max(1, Math.ceil(res.total / res.limit));
+          this.isLoading = false;
+        },
+        error: () => {
+          this.isLoading = false;
+        },
+      });
   }
 
   nextPage(): void {

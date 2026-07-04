@@ -1,4 +1,5 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../services';
 import { CreateReferenceDto } from './dto/create-reference.dto';
 import { searchReferenceInCSV } from './utils/utils';
@@ -13,12 +14,29 @@ export class ReferenceService {
     private notificationService: NotificationService,
   ) {}
 
-  async findAll(page = 1, limit = 15, maxQuantity?: number) {
+  async findAll(page = 1, limit = 15, maxQuantity?: number, search?: string) {
     const safePage = page > 0 ? page : 1;
     const safeLimit = limit > 0 ? limit : 15;
     // When filtering low stock, show the most critical (lowest quantity) first.
     const isAlert = maxQuantity !== undefined && !isNaN(maxQuantity);
-    const where = isAlert ? { quantity: { lte: maxQuantity } } : {};
+    const term = search?.trim();
+
+    const conditions: Prisma.referenceWhereInput[] = [];
+    if (isAlert) {
+      conditions.push({ quantity: { lte: maxQuantity } });
+    }
+    if (term) {
+      conditions.push({
+        OR: [
+          { name: { contains: term, mode: 'insensitive' } },
+          { cip13: { contains: term } },
+        ],
+      });
+    }
+    const where: Prisma.referenceWhereInput = conditions.length
+      ? { AND: conditions }
+      : {};
+
     const [data, total] = await this.prisma.$transaction([
       this.prisma.reference.findMany({
         where,

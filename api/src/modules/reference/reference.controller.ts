@@ -29,11 +29,13 @@ export class ReferenceController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
     @Query('maxQuantity') maxQuantity?: string,
+    @Query('search') search?: string,
   ) {
     return await this.referenceService.findAll(
       page ? parseInt(page, 10) : undefined,
       limit ? parseInt(limit, 10) : undefined,
       maxQuantity !== undefined ? parseInt(maxQuantity, 10) : undefined,
+      search,
     );
   }
 

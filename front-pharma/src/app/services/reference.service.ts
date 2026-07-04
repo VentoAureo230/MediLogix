@@ -20,10 +20,14 @@ export class ReferenceService {
     page = 1,
     limit = 15,
     maxQuantity?: number,
+    search?: string,
   ): Observable<Paginated<Reference>> {
     let params = new HttpParams().set('page', page).set('limit', limit);
     if (maxQuantity !== undefined) {
       params = params.set('maxQuantity', maxQuantity);
+    }
+    if (search) {
+      params = params.set('search', search);
     }
     return this.http.get<Paginated<Reference>>(this.apiUrl, { params });
   }
