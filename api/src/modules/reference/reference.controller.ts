@@ -22,14 +22,18 @@ export class ReferenceController {
   constructor(private referenceService: ReferenceService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List references (paginated)' })
+  @ApiOperation({
+    summary: 'List references (paginated, optional low-stock filter)',
+  })
   async listReferences(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
+    @Query('maxQuantity') maxQuantity?: string,
   ) {
     return await this.referenceService.findAll(
       page ? parseInt(page, 10) : undefined,
       limit ? parseInt(limit, 10) : undefined,
+      maxQuantity !== undefined ? parseInt(maxQuantity, 10) : undefined,
     );
   }
 

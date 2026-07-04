@@ -13,16 +13,20 @@ export class ReferenceService {
     private notificationService: NotificationService,
   ) {}
 
-  async findAll(page = 1, limit = 15) {
+  async findAll(page = 1, limit = 15, maxQuantity?: number) {
     const safePage = page > 0 ? page : 1;
     const safeLimit = limit > 0 ? limit : 15;
+    // When filtering low stock, show the most critical (lowest quantity) first.
+    const isAlert = maxQuantity !== undefined && !isNaN(maxQuantity);
+    const where = isAlert ? { quantity: { lte: maxQuantity } } : {};
     const [data, total] = await this.prisma.$transaction([
       this.prisma.reference.findMany({
+        where,
         skip: (safePage - 1) * safeLimit,
         take: safeLimit,
-        orderBy: { id: 'asc' },
+        orderBy: isAlert ? { quantity: 'asc' } : { id: 'asc' },
       }),
-      this.prisma.reference.count(),
+      this.prisma.reference.count({ where }),
     ]);
     return { data, total, page: safePage, limit: safeLimit };
   }

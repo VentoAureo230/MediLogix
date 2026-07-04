@@ -16,10 +16,15 @@ export class ReferenceService {
 
   constructor(private http: HttpClient) {}
 
-  getReferences(page = 1, limit = 15): Observable<Paginated<Reference>> {
-    const params = new HttpParams()
-      .set('page', page)
-      .set('limit', limit);
+  getReferences(
+    page = 1,
+    limit = 15,
+    maxQuantity?: number,
+  ): Observable<Paginated<Reference>> {
+    let params = new HttpParams().set('page', page).set('limit', limit);
+    if (maxQuantity !== undefined) {
+      params = params.set('maxQuantity', maxQuantity);
+    }
     return this.http.get<Paginated<Reference>>(this.apiUrl, { params });
   }
 

@@ -11,25 +11,13 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Ibuprofène</td>
-                    <td class="text-center px-4">3</td>
-                    <td class="text-center px-4"><span class="bg-yellow-200 text-yellow-600 px-2 py-1 rounded">Stock faible</span></td>
+                <tr *ngFor="let item of medicationAlerts">
+                    <td>{{ item.name }}</td>
+                    <td class="text-center px-4">{{ item.quantity }}</td>
+                    <td class="text-center px-4"><span [ngClass]="getStatusClass(item.statut)" class="px-2 py-1 rounded">{{ item.statut }}</span></td>
                 </tr>
-                <tr>
-                    <td>Amoxicilline</td>
-                    <td class="text-center px-4">0</td>
-                    <td class="text-center px-4"><span class="bg-red-200 text-red-600 px-2 py-1 rounded">Rupture de stock</span></td>
-                </tr>
-                <tr>
-                    <td>Furosémide</td>
-                    <td class="text-center px-4">8</td>
-                    <td class="text-center px-4"><span class="bg-yellow-200 text-yellow-600 px-2 py-1 rounded">Stock faible</span></td>
-                </tr>
-                <tr>
-                    <td>Morphine</td>
-                    <td class="text-center px-4">2</td>
-                    <td class="text-center px-4"><span class="bg-red-200 text-red-600 px-2 py-1 rounded">Rupture de stock</span></td>
+                <tr *ngIf="medicationAlerts.length === 0">
+                    <td colspan="3" class="text-center text-gray-400 py-2">Aucune alerte</td>
                 </tr>
             </tbody>
         </table>
@@ -48,30 +36,10 @@
                 </tr>
             </thead>
             <tbody>
-                <tr>
-                    <td>Ecarteur</td>
-                    <td class="text-center px-4">0</td>
-                    <td class="text-center px-4"><span class="bg-red-200 text-red-600 px-2 py-1 rounded">Rupture de stock</span></td>
-                </tr>
-                <tr>
-                    <td>Pince chirurgicale</td>
-                    <td class="text-center px-4">0</td>
-                    <td class="text-center px-4"><span class="bg-red-200 text-red-600 px-2 py-1 rounded">Rupture de stock</span></td>
-                </tr>
-                <tr>
-                    <td>Seringue</td>
-                    <td class="text-center px-4">2</td>
-                    <td class="text-center px-4"><span class="bg-yellow-200 text-yellow-600 px-2 py-1 rounded">Stock faible</span></td>
-                </tr>
-                <tr>
-                    <td>Pince hémostatique</td>
-                    <td class="text-center px-4">10</td>
-                    <td class="text-center px-4"><span class="bg-yellow-200 text-yellow-600 px-2 py-1 rounded">Stock faible</span></td>
-                </tr>
-                <tr>
-                    <td>Ciseaux chirurgicaux</td>
-                    <td class="text-center px-4">12</td>
-                    <td class="text-center px-4"><span class="bg-yellow-200 text-yellow-600 px-2 py-1 rounded">Stock faible</span></td>
+                <tr *ngFor="let item of instrumentAlerts">
+                    <td>{{ item.name }}</td>
+                    <td class="text-center px-4">{{ item.quantity }}</td>
+                    <td class="text-center px-4"><span [ngClass]="getStatusClass(item.statut)" class="px-2 py-1 rounded">{{ item.statut }}</span></td>
                 </tr>
             </tbody>
         </table>
