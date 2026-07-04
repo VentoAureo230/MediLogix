@@ -3,9 +3,16 @@ import { UserModule } from './modules/user/user.module';
 import { AuthenticationModule } from './modules/authentication/authentication.module';
 import { InfoModule } from './modules/info/info.module';
 import { ReferenceModule } from './modules/reference/reference.module';
+import { OrderModule } from './modules/order/order.module';
 
 @Module({
-  imports: [AuthenticationModule, UserModule, InfoModule, ReferenceModule],
+  imports: [
+    AuthenticationModule,
+    UserModule,
+    InfoModule,
+    ReferenceModule,
+    OrderModule,
+  ],
   controllers: [],
   providers: [],
 })

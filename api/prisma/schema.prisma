@@ -46,7 +46,7 @@ model user {
 model order {
   id         Int                   @id @default(autoincrement())
   user_id    Int
-  status     enum_order_status
+  status     enum_order_status     @default(New)
   created_at DateTime              @default(now())
   updated_at DateTime              @updatedAt
   user       user                  @relation(fields: [user_id], references: [id])
@@ -62,7 +62,7 @@ model order_has_reference {
   order        order     @relation(fields: [order_id], references: [id])
   reference    reference @relation(fields: [reference_id], references: [id])
 
-  @@id([order_id, reference_id, created_at])
+  @@id([order_id, reference_id])
 }
 
 model reference {
