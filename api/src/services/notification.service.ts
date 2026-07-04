@@ -1,13 +1,11 @@
-import { Injectable, HttpServer } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { NotificationGateway } from 'src/services/notification.gateway';
 
 @Injectable()
 export class NotificationService {
-  constructor(private readonly httpService: HttpServer) {}
+  constructor(private readonly notificationGateway: NotificationGateway) {}
 
-  handleNotification(payload: any) {
-    this.httpService.post('http://localhost:5000/notify', payload).subscribe({
-      next: () => console.log('Notification sent to WebSocket server'),
-      error: (err) => console.error('Failed to notify WebSocket server', err),
-    });
+  notifyNewMedication(payload: unknown) {
+    this.notificationGateway.broadcast('newMedication', payload);
   }
 }
