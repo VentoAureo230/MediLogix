@@ -12,7 +12,12 @@ start_if_needed () {
     return
   fi
   echo "==> Starting $name ($cmd) in $dir — logs: $LOG_DIR/$name.log"
-  (cd "$dir" && nohup bash -c "$cmd" > "$LOG_DIR/$name.log" 2>&1 &)
+  # setsid fully detaches the process into its own session (no controlling
+  # tty, not part of this exec session's process group), so it keeps running
+  # after postStartCommand's docker-exec session ends. Plain `nohup ... &`
+  # is not enough here: the child stays in the exec session's process group
+  # and was observed getting reaped/killed as soon as that session closed.
+  (cd "$dir" && setsid nohup bash -c "$cmd" < /dev/null > "$LOG_DIR/$name.log" 2>&1 &)
 }
 
 start_if_needed "api"   3000 "$WORKSPACE_DIR/api"         "npm run start:dev"
