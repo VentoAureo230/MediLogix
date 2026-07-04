@@ -1,6 +1,6 @@
 import * as Joi from 'joi';
 
-declare var process: {
+declare let process: {
   env: EnvConfig;
 };
 

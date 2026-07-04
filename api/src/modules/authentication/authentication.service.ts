@@ -1,4 +1,9 @@
-import { HttpException, HttpStatus, Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  HttpException,
+  HttpStatus,
+  Injectable,
+  OnModuleInit,
+} from '@nestjs/common';
 import { PrismaService } from 'src/services';
 import { CreateUserDto } from '../user/dto/create-user.dto';
 import { PasswordService } from 'src/services/password.service';
@@ -10,16 +15,16 @@ export class AuthenticationService implements OnModuleInit {
   constructor(
     private prisma: PrismaService,
     private readonly passwordService: PasswordService,
-    private jwtService: JwtService
-  ) { }
+    private jwtService: JwtService,
+  ) {}
 
   async onModuleInit() {
     const admin = await this.prisma.user.findFirst({
       where: {
-        email: 'ios@ios.fr'
-      }
+        email: 'ios@ios.fr',
+      },
     });
-    if(!admin) {
+    if (!admin) {
       await this.createAdminAccount();
     }
   }
@@ -29,8 +34,8 @@ export class AuthenticationService implements OnModuleInit {
       data: {
         email: createUserDto.email,
         password: createUserDto.password,
-        role: createUserDto.role
-      }
+        role: createUserDto.role,
+      },
     });
     return res;
   }
@@ -38,15 +43,18 @@ export class AuthenticationService implements OnModuleInit {
   async login(email: string, password: string) {
     const user = await this.prisma.user.findUnique({
       where: {
-        email
-      }
+        email,
+      },
     });
-    if(!user) {
-      return { message: 'User not found' }
+    if (!user) {
+      return { message: 'User not found' };
     }
 
-    const isPasswordValid = await this.passwordService.checkHash(user.password, password);
-    if(!isPasswordValid) {
+    const isPasswordValid = await this.passwordService.checkHash(
+      user.password,
+      password,
+    );
+    if (!isPasswordValid) {
       throw new HttpException('Invalid password', HttpStatus.BAD_REQUEST);
     }
 
@@ -63,13 +71,14 @@ export class AuthenticationService implements OnModuleInit {
   }
 
   async createAdminAccount() {
-    const hashedPassword = await this.passwordService.hashPassword('Password1&');
+    const hashedPassword =
+      await this.passwordService.hashPassword('Password1&');
     const admin = await this.prisma.user.create({
       data: {
         email: 'ios@ios.fr',
         password: hashedPassword,
-        role: enum_hospital_role.Admin
-      }
+        role: enum_hospital_role.Admin,
+      },
     });
     console.log('Admin account created', admin);
     return admin;

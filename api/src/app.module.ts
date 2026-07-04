@@ -5,13 +5,8 @@ import { InfoModule } from './modules/info/info.module';
 import { ReferenceModule } from './modules/reference/reference.module';
 
 @Module({
-  imports: [
-    AuthenticationModule,
-    UserModule,
-    InfoModule,
-    ReferenceModule
-  ],
+  imports: [AuthenticationModule, UserModule, InfoModule, ReferenceModule],
   controllers: [],
   providers: [],
 })
-export class AppModule { }
+export class AppModule {}
