@@ -2,3 +2,4 @@ api/keys
 mobile/.env
 node_modules
 keys/
+.devcontainer/logs/

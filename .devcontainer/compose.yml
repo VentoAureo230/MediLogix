@@ -1,0 +1,66 @@
+name: medilogix
+
+services:
+  workspace:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: sleep infinity
+    volumes:
+      - ..:/workspace:cached
+      - api-node-modules:/workspace/api/node_modules
+      - front-node-modules:/workspace/front-pharma/node_modules
+    ports:
+      - "3000:3000"
+      - "4200:4200"
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - medilogix-net
+
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: medilogix
+      POSTGRES_PASSWORD: medilogix
+      POSTGRES_DB: medilogix
+    ports:
+      - "5433:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medilogix -d medilogix"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - medilogix-net
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      - db
+    networks:
+      - medilogix-net
+
+volumes:
+  db-data:
+  pgadmin-data:
+  api-node-modules:
+  front-node-modules:
+
+networks:
+  medilogix-net:
+    driver: bridge
