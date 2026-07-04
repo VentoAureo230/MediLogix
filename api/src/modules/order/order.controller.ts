@@ -1,6 +1,7 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, UseGuards } from '@nestjs/common';
 import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { OrderService } from './order.service';
+import { UpdateOrderDto } from './dto/update-order.dto';
 import { AuthGuardService } from 'src/services/auth-guard.service';
 
 @ApiTags('order')
@@ -17,5 +18,17 @@ export class OrderController {
   })
   async findAll() {
     return await this.orderService.findAll();
+  }
+
+  @Patch(':id')
+  @ApiOperation({ summary: 'Update an order status' })
+  async updateStatus(
+    @Param('id') id: string,
+    @Body() updateOrderDto: UpdateOrderDto,
+  ) {
+    return await this.orderService.updateStatus(
+      parseInt(id, 10),
+      updateOrderDto.status,
+    );
   }
 }
