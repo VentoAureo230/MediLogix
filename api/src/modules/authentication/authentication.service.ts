@@ -66,8 +66,8 @@ export class AuthenticationService implements OnModuleInit {
     // };
     // return userWithToken;
 
-    const accessToken = this.jwtService.generateToken(user.id);
-    return accessToken;
+    const accessToken = await this.jwtService.generateToken(user.id);
+    return { token: accessToken };
   }
 
   async createAdminAccount() {
