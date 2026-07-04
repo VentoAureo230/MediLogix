@@ -9,13 +9,13 @@ FRONT_DIR="$WORKSPACE_DIR/front-pharma"
 # package-lock.json, so there's no shared frozen lockfile across machines/npm
 # versions to enforce — `ci` just produces spurious "out of sync" failures
 # when the lockfile was last touched by a different npm version.
-echo "==> [1/6] Installing api dependencies..."
+echo "==> [1/7] Installing api dependencies..."
 (cd "$API_DIR" && npm install)
 
-echo "==> [2/6] Installing front-pharma dependencies..."
+echo "==> [2/7] Installing front-pharma dependencies..."
 (cd "$FRONT_DIR" && npm install)
 
-echo "==> [3/6] Bootstrapping api/.env ..."
+echo "==> [3/7] Bootstrapping api/.env ..."
 if [ ! -f "$API_DIR/.env" ]; then
   cp "$API_DIR/.env.txt" "$API_DIR/.env"
   echo "    Created api/.env from api/.env.txt"
@@ -39,7 +39,7 @@ if grep -qE '^CORS_ORIGIN=$' "$API_DIR/.env"; then
   sed -i -E 's#^CORS_ORIGIN=.*#CORS_ORIGIN=*#' "$API_DIR/.env"
 fi
 
-echo "==> [4/6] Generating RS256 JWT keypair (if missing)..."
+echo "==> [4/7] Generating RS256 JWT keypair (if missing)..."
 if grep -qE '^JWT_PRIVATE_KEY=$' "$API_DIR/.env"; then
   mkdir -p "$API_DIR/keys"
   if [ ! -f "$API_DIR/keys/private.pem" ]; then
@@ -58,7 +58,7 @@ else
   echo "    JWT keys already present in api/.env — skipping generation."
 fi
 
-echo "==> [5/6] Bootstrapping front-pharma environment.ts ..."
+echo "==> [5/7] Bootstrapping front-pharma environment.ts ..."
 if [ ! -f "$FRONT_DIR/src/environments/environment.ts" ]; then
   cp "$FRONT_DIR/src/environments/environment.ts.dist" "$FRONT_DIR/src/environments/environment.ts"
 fi
@@ -66,11 +66,14 @@ if grep -q "url: ''" "$FRONT_DIR/src/environments/environment.ts"; then
   sed -i "s#url: ''#url: 'http://localhost:3000'#" "$FRONT_DIR/src/environments/environment.ts"
 fi
 
-echo "==> [6/6] Waiting for database and applying Prisma migrations..."
+echo "==> [6/7] Waiting for database and applying Prisma migrations..."
 until pg_isready -h db -p 5432 -U medilogix >/dev/null 2>&1; do
   echo "    Waiting for db..."
   sleep 2
 done
 (cd "$API_DIR" && npx prisma generate && npx prisma migrate deploy)
+
+echo "==> [7/7] Seeding reference data from api/data/medicaments.csv (idempotent)..."
+(cd "$API_DIR" && npx prisma db seed)
 
 echo "==> post-create.sh done."

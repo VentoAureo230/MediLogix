@@ -69,7 +69,7 @@ model reference {
   id         Int                   @id @default(autoincrement())
   name       String
   cip7       String
-  cip13      String
+  cip13      String                @unique
   quantity   Int
   created_at DateTime              @default(now())
   updated_at DateTime              @updatedAt
