@@ -1,19 +1,14 @@
 import { CommonModule } from '@angular/common';
-import { Component, OnInit } from '@angular/core';
-import { MedicationService } from '../../services/medication.service';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ReferenceService } from '../../services/reference.service';
 import { WebSocketService } from '../../services/websocket.service';
+import { Reference } from '../../models/reference.model';
 
 interface Item {
-  nom: string;
-  categorie: string;
-  emplacement: string;
-  quantite: number;
+  name: string;
+  cip13: string;
+  quantity: number;
   statut: string;
-}
-
-interface Items {
-  medicament: Item[];
-  instrument: Item[];
 }
 
 @Component({
@@ -21,82 +16,79 @@ interface Items {
   standalone: true,
   imports: [CommonModule],
   templateUrl: './store.component.html',
-  styleUrl: './store.component.css'
+  styleUrl: './store.component.css',
 })
-export class StoreComponent implements OnInit {
-
-  paginatedItems: any[] = [];
+export class StoreComponent implements OnInit, OnDestroy {
+  items: Item[] = [];
   itemsPerPage = 15;
   currentPage = 1;
   totalPages = 1;
-  items: Items = {
-    medicament: [],
-    instrument: []
-  };
+  total = 0;
   isLoading = false;
 
+  private wsUnsubscribe?: () => void;
+
   constructor(
-    private medication: MedicationService,
-    private websocketService: WebSocketService
-  ) { }
+    private referenceService: ReferenceService,
+    private websocketService: WebSocketService,
+  ) {}
 
   ngOnInit(): void {
+    this.loadPage(1);
+    // A new reference created anywhere → refresh the current page.
+    this.wsUnsubscribe = this.websocketService.onNewMedication(() => {
+      this.loadPage(this.currentPage);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.wsUnsubscribe?.();
+  }
+
+  loadPage(page: number): void {
     this.isLoading = true;
-    this.medication.getMedications().subscribe((data) => {
-      this.items.medicament = data.map((med: any) => ({
-        nom: med.name,
-        categorie: med.category,
-        emplacement: med.location,
-        quantite: med.quantity,
-        statut: med.availability
-      }));
-      this.updatePagination();
-      this.isLoading = false;
-    }, (error) => {
-      alert('Error fetching medications' + error);
-      this.isLoading = false;
-    });
-
-    this.websocketService.onNewMedication((newMedication) => {
-      console.log('New medication received:', newMedication);
-      this.medication.push(newMedication);
-      this.updatePagination();
+    this.referenceService.getReferences(page, this.itemsPerPage).subscribe({
+      next: (res) => {
+        this.items = res.data.map((ref) => this.toItem(ref));
+        this.total = res.total;
+        this.currentPage = res.page;
+        this.totalPages = Math.max(1, Math.ceil(res.total / res.limit));
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      },
     });
   }
 
-  ngOnDestroy() {
-    this.websocketService.disconnect();
-  }
-
-  selectedTab: 'medicament' | 'instrument' = 'medicament';
-
-
-
-  switchTab(tab: 'medicament' | 'instrument') {
-    this.selectedTab = tab;
-    this.updatePagination();
-  }
-
-  updatePagination() {
-    const itemsForTab = this.items[this.selectedTab];
-    this.totalPages = Math.ceil(itemsForTab.length / this.itemsPerPage);
-    const start = (this.currentPage - 1) * this.itemsPerPage;
-    const end = start + this.itemsPerPage;
-    this.paginatedItems = itemsForTab.slice(start, end);
-  }
-
-  nextPage() {
+  nextPage(): void {
     if (this.currentPage < this.totalPages) {
-      this.currentPage++;
-      this.updatePagination();
+      this.loadPage(this.currentPage + 1);
     }
   }
 
-  previousPage() {
+  previousPage(): void {
     if (this.currentPage > 1) {
-      this.currentPage--;
-      this.updatePagination();
+      this.loadPage(this.currentPage - 1);
     }
+  }
+
+  addStock(item: Item): void {
+    const input = prompt(`Quantité à ajouter pour ${item.name} :`, '10');
+    if (input === null) {
+      return;
+    }
+    const qty = parseInt(input, 10);
+    if (isNaN(qty) || qty <= 0) {
+      return;
+    }
+    this.referenceService.updateQuantity(item.cip13, qty).subscribe({
+      next: (updated) => {
+        item.quantity = updated.quantity;
+        item.statut = this.deriveStatus(updated.quantity);
+      },
+      error: () => alert('Échec de la mise à jour du stock'),
+    });
   }
 
   getStockStatusClass(status: string): string {
@@ -112,7 +104,22 @@ export class StoreComponent implements OnInit {
     }
   }
 
-  addStock(item: Item) {
-    console.log(`Adding stock for: ${item.nom}`);
+  private toItem(ref: Reference): Item {
+    return {
+      name: ref.name,
+      cip13: ref.cip13,
+      quantity: ref.quantity,
+      statut: this.deriveStatus(ref.quantity),
+    };
+  }
+
+  private deriveStatus(quantity: number): string {
+    if (quantity === 0) {
+      return 'En rupture';
+    }
+    if (quantity <= 80) {
+      return 'Stock faible';
+    }
+    return 'En stock';
   }
 }
