@@ -1,6 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReferenceService } from '../../services/reference.service';
+import { OrderService } from '../../services/order.service';
+import { Order } from '../../models/order.model';
 
 interface AlertRow {
   name: string;
@@ -34,7 +36,12 @@ export class HomeComponent implements OnInit {
     { name: 'Porte-aiguille', quantity: 20, statut: 'Stock faible' },
   ];
 
-  constructor(private referenceService: ReferenceService) {}
+  newOrders: Order[] = [];
+
+  constructor(
+    private referenceService: ReferenceService,
+    private orderService: OrderService,
+  ) {}
 
   ngOnInit(): void {
     this.referenceService.getReferences(1, 10, ALERT_THRESHOLD).subscribe({
@@ -47,6 +54,15 @@ export class HomeComponent implements OnInit {
       },
       error: () => {
         this.medicationAlerts = [];
+      },
+    });
+
+    this.orderService.getOrders('New').subscribe({
+      next: (orders) => {
+        this.newOrders = orders;
+      },
+      error: () => {
+        this.newOrders = [];
       },
     });
   }

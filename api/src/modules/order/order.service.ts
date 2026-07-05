@@ -18,10 +18,7 @@ export class OrderService {
     }
     const order = await this.prisma.order.findUnique({ where: { id } });
     if (!order) {
-      throw new HttpException(
-        `Order ${id} not found`,
-        HttpStatus.NOT_FOUND,
-      );
+      throw new HttpException(`Order ${id} not found`, HttpStatus.NOT_FOUND);
     }
     return await this.prisma.order.update({
       where: { id },
@@ -31,8 +28,13 @@ export class OrderService {
 
   // Postgres sorts enum columns by their declaration order, which is
   // New < Ongoing < Ready < Cancelled — exactly the wanted order.
-  async findAll() {
+  async findAll(status?: enum_order_status) {
+    const where =
+      status && Object.values(enum_order_status).includes(status)
+        ? { status }
+        : {};
     return await this.prisma.order.findMany({
+      where,
       orderBy: [{ status: 'asc' }, { created_at: 'desc' }],
       include: {
         user: { select: { id: true, email: true, role: true } },
