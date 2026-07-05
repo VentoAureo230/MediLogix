@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
-import 'package:mobile/model/csv_reference.dart';
-import 'package:mobile/model/reference.dart';
+import 'package:mobile/.model/csv_reference.dart';
+import 'package:mobile/.model/reference.dart';
 import 'package:mobile/util/utils.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 import 'package:mobile/service/api_singleton.dart';

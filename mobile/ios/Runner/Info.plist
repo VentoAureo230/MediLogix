@@ -26,6 +26,20 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- Dev-only: allow plain-HTTP traffic to the local NestJS backend.
+	     Production builds must serve the API over HTTPS and this block
+	     should be removed (or narrowed to specific domains). -->
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsArbitraryLoads</key>
+		<true/>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<!-- iOS 14+: requests to private LAN IPs (192.168.x.x, 10.x.x.x, …)
+	     require this description string, otherwise they silently fail. -->
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>MediLogix needs access to the local network to reach the backend server during development.</string>
 	<key>NSCameraUsageDescription</key>
 	<string>This app needs camera access to scan QR codes</string>
 	<key>NSPhotoLibraryUsageDescription</key>

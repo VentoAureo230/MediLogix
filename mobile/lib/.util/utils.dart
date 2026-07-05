@@ -1,7 +1,7 @@
 import 'package:csv/csv.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
-import 'package:mobile/model/csv_reference.dart';
+import 'package:mobile/.model/csv_reference.dart';
 import 'package:collection/collection.dart';
 
 Future<List<T>> extractListFromCSV<T>(String filePath, T Function(List<dynamic>) fromCsvRow) async {
