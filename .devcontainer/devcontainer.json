@@ -1,10 +1,17 @@
 {
   "name": "MediLogix (api + front-pharma + db + pgAdmin)",
   "dockerComposeFile": "compose.yml",
-  "service": "workspace",
+  "service": "api",
   "workspaceFolder": "/workspace",
   "shutdownAction": "stopCompose",
-  "remoteUser": "node",
+
+  "forwardPorts": [5433, 5050, 3000, 4200],
+  "portsAttributes": {
+    "5433": { "label": "PostgreSQL (host port, container listens on 5432)" },
+    "5050": { "label": "pgAdmin" },
+    "3000": { "label": "NestJS API" },
+    "4200": { "label": "Front-pharma (Angular)" }
+  },
 
   "customizations": {
     "vscode": {
@@ -19,16 +26,5 @@
         "terminal.integrated.defaultProfile.linux": "bash"
       }
     }
-  },
-
-  "forwardPorts": [3000, 4200, 5433, 5050],
-  "portsAttributes": {
-    "3000": { "label": "API (NestJS)", "onAutoForward": "notify" },
-    "4200": { "label": "Front-pharma (Angular)", "onAutoForward": "openBrowser" },
-    "5433": { "label": "PostgreSQL (host port, container listens on 5432)", "onAutoForward": "silent" },
-    "5050": { "label": "pgAdmin", "onAutoForward": "silent" }
-  },
-
-  "postCreateCommand": "bash .devcontainer/post-create.sh",
-  "postStartCommand": "bash .devcontainer/post-start.sh"
+  }
 }
