@@ -3,9 +3,11 @@ import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
 @Controller('info')
 export class InfoController {
-
   @Get('')
-  @ApiOperation({ summary: 'Show API Version', description: 'Show API Version' })
+  @ApiOperation({
+    summary: 'Show API Version',
+    description: 'Show API Version',
+  })
   @ApiResponse({
     status: 200,
     description: 'API version information',

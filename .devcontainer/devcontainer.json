@@ -1,0 +1,30 @@
+{
+  "name": "MediLogix (api + front-pharma + db + pgAdmin)",
+  "dockerComposeFile": "compose.yml",
+  "service": "api",
+  "workspaceFolder": "/workspace",
+  "shutdownAction": "stopCompose",
+
+  "forwardPorts": [5433, 5050, 3000, 4200],
+  "portsAttributes": {
+    "5433": { "label": "PostgreSQL (host port, container listens on 5432)" },
+    "5050": { "label": "pgAdmin" },
+    "3000": { "label": "NestJS API" },
+    "4200": { "label": "Front-pharma (Angular)" }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "Angular.ng-template",
+        "Prisma.prisma",
+        "ms-azuretools.vscode-docker"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+FROM node:20-bullseye
+
+# Angular CLI matches package.json (@angular/cli ^18.2.7)
+RUN npm install -g @angular/cli@18
+
+WORKDIR /app
+
+# Copy dependency files first (Docker layer caching)
+COPY package.json ./
+RUN npm install
+
+EXPOSE 4200
+
+# Code is mounted as a volume at runtime — no COPY of source needed.
+# node_modules from the image is preserved via an anonymous volume in compose.
+# `ng serve` is set via compose `command:` so it stays visible in devcontainer.json.

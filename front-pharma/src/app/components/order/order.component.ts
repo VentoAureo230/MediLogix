@@ -1,12 +1,114 @@
-import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { OrderService } from '../../services/order.service';
+import { Order } from '../../models/order.model';
+
+const STATUS_ORDER: Record<string, number> = {
+  New: 0,
+  Ongoing: 1,
+  Ready: 2,
+  Cancelled: 3,
+};
 
 @Component({
   selector: 'app-order',
   standalone: true,
-  imports: [],
+  imports: [CommonModule, FormsModule],
   templateUrl: './order.component.html',
-  styleUrl: './order.component.css'
+  styleUrl: './order.component.css',
 })
-export class OrderComponent {
+export class OrderComponent implements OnInit {
+  orders: Order[] = [];
+  paginatedOrders: Order[] = [];
+  itemsPerPage = 10;
+  currentPage = 1;
+  totalPages = 1;
+  isLoading = false;
+  expandedOrderId: number | null = null;
+  readonly statuses = ['New', 'Ongoing', 'Ready', 'Cancelled'];
 
+  constructor(private orderService: OrderService) {}
+
+  ngOnInit(): void {
+    this.isLoading = true;
+    this.orderService.getOrders().subscribe({
+      next: (data) => {
+        this.orders = data;
+        this.totalPages = Math.max(
+          1,
+          Math.ceil(this.orders.length / this.itemsPerPage),
+        );
+        this.updatePagination();
+        this.isLoading = false;
+      },
+      error: () => {
+        this.isLoading = false;
+      },
+    });
+  }
+
+  updatePagination(): void {
+    const start = (this.currentPage - 1) * this.itemsPerPage;
+    this.paginatedOrders = this.orders.slice(start, start + this.itemsPerPage);
+  }
+
+  toggleOrder(id: number): void {
+    this.expandedOrderId = this.expandedOrderId === id ? null : id;
+  }
+
+  changeStatus(order: Order, newStatus: string): void {
+    if (newStatus === order.status) {
+      return;
+    }
+    const previous = order.status;
+    order.status = newStatus; // optimistic
+    this.orderService.updateStatus(order.id, newStatus).subscribe({
+      next: () => this.resort(),
+      error: () => {
+        order.status = previous;
+        alert('Échec de la mise à jour du statut');
+      },
+    });
+  }
+
+  // Keep the list consistent with the API sort (New > Ongoing > Ready > Cancelled)
+  // after a status change, without a full refetch.
+  private resort(): void {
+    this.orders.sort(
+      (a, b) => (STATUS_ORDER[a.status] ?? 99) - (STATUS_ORDER[b.status] ?? 99),
+    );
+    this.updatePagination();
+  }
+
+  nextPage(): void {
+    if (this.currentPage < this.totalPages) {
+      this.currentPage++;
+      this.expandedOrderId = null;
+      this.updatePagination();
+    }
+  }
+
+  previousPage(): void {
+    if (this.currentPage > 1) {
+      this.currentPage--;
+      this.expandedOrderId = null;
+      this.updatePagination();
+    }
+  }
+
+  getStatusClass(status: string): string {
+    switch (status) {
+      case 'New':
+        return 'bg-blue-200 text-blue-600';
+      case 'Ongoing':
+        return 'bg-yellow-200 text-yellow-600';
+      case 'Ready':
+        return 'bg-green-200 text-green-600';
+      case 'Cancelled':
+        return 'bg-red-200 text-red-600';
+      default:
+        return 'bg-gray-200 text-gray-600';
+    }
+  }
 }

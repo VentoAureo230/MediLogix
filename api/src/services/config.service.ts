@@ -1,6 +1,6 @@
 import * as Joi from 'joi';
 
-declare var process: {
+declare let process: {
   env: EnvConfig;
 };
 
@@ -27,7 +27,7 @@ export class ConfigService {
       CORS_ORIGIN: Joi.string(),
       JWT_PRIVATE_KEY: Joi.string().required(),
       JWT_PUBLIC_KEY: Joi.string().required(),
-      JWT_PASSPHRASE: Joi.string(),
+      JWT_PASSPHRASE: Joi.string().allow(''),
       JWT_EXPIRES_IN: Joi.string(),
     }).unknown(true);
 
@@ -55,7 +55,9 @@ export class ConfigService {
     return String(this.envConfig.JWT_PASSPHRASE);
   }
 
-  get jwtExpiresIn(): number {
-    return parseInt(this.envConfig.JWT_EXPIRES_IN);
+  // Returned as-is (e.g. "1d") so jsonwebtoken parses the duration string.
+  // parseInt("1d") === 1 would mean a 1-SECOND token (numeric expiresIn = seconds).
+  get jwtExpiresIn(): string {
+    return String(this.envConfig.JWT_EXPIRES_IN);
   }
 }

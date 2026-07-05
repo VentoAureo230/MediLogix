@@ -1,12 +1,12 @@
 import { NestFactory } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { AppModule } from './app.module';
-import * as dotenv from 'dotenv'
+import * as dotenv from 'dotenv';
 import { ConfigService } from './services/config.service';
 import { WsAdapter } from '@nestjs/platform-ws';
 
 async function bootstrap() {
-  dotenv.config()
+  dotenv.config();
   const app = await NestFactory.create(AppModule);
   const configService = app.get(ConfigService);
   app.enableCors({
@@ -21,7 +21,7 @@ async function bootstrap() {
     ],
     exposedHeaders: 'Authorization',
     credentials: true,
-    methods: ['GET', 'PUT', 'PATCH' ,'OPTIONS', 'POST', 'DELETE'],
+    methods: ['GET', 'PUT', 'PATCH', 'OPTIONS', 'POST', 'DELETE'],
   });
 
   const config = new DocumentBuilder()
@@ -32,7 +32,7 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('api', app, document);
-  
+
   app.useWebSocketAdapter(new WsAdapter(app));
 
   await app.listen(parseInt(process.env.PORT) || 3000, '0.0.0.0');

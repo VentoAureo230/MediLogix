@@ -14,7 +14,7 @@ import { JwtService } from 'src/services/jwt.service';
     AuthGuardService,
     PrismaService,
     PasswordService,
-    JwtService
+    JwtService,
   ],
 })
 export class AuthenticationModule {}
