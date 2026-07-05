@@ -1,66 +1,108 @@
 name: medilogix
 
-services:
-  workspace:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    command: sleep infinity
-    volumes:
-      - ..:/workspace:cached
-      - api-node-modules:/workspace/api/node_modules
-      - front-node-modules:/workspace/front-pharma/node_modules
-    ports:
-      - "3000:3000"
-      - "4200:4200"
-    depends_on:
-      db:
-        condition: service_healthy
-    networks:
-      - medilogix-net
+volumes:
+  db-data:
+  pgadmin-data:
 
+networks:
+  medilogix-net:
+
+services:
+  # ──────────────────────────────────────────────
+  # PostgreSQL Database
+  # ──────────────────────────────────────────────
   db:
     image: postgres:16-alpine
     restart: unless-stopped
+    networks:
+      - medilogix-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medilogix -d medilogix"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - db-data:/var/lib/postgresql/data
     environment:
       POSTGRES_USER: medilogix
       POSTGRES_PASSWORD: medilogix
       POSTGRES_DB: medilogix
     ports:
       - "5433:5432"
-    volumes:
-      - db-data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U medilogix -d medilogix"]
-      interval: 5s
-      timeout: 5s
-      retries: 10
-    networks:
-      - medilogix-net
 
+  # ──────────────────────────────────────────────
+  # pgAdmin 4
+  # ──────────────────────────────────────────────
   pgadmin:
     image: dpage/pgadmin4:latest
     restart: unless-stopped
+    networks:
+      - medilogix-net
+    ports:
+      - "5050:80"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: admin
       PGADMIN_CONFIG_SERVER_MODE: "False"
-    ports:
-      - "5050:80"
-    volumes:
-      - pgadmin-data:/var/lib/pgadmin
-      - ./pgadmin-servers.json:/pgadmin4/servers.json:ro
-    depends_on:
-      - db
+
+  # ──────────────────────────────────────────────
+  # NestJS API (PRIMARY devcontainer service — VS Code attaches here)
+  # ──────────────────────────────────────────────
+  api:
+    build:
+      context: ../api
+      dockerfile: ../.devcontainer/Dockerfile.api
     networks:
       - medilogix-net
+    ports:
+      - "3000:3000"
+    depends_on:
+      db:
+        condition: service_healthy
+    volumes:
+      # Entire monorepo mounted so VS Code sees front-pharma, mobile, docs, etc.
+      - ../:/workspace
+      # API source mounted for hot reload
+      - ../api:/usr/src/app
+      # Anonymous volume preserves image-installed node_modules from being
+      # shadowed by the ../api bind-mount
+      - /usr/src/app/node_modules
+    environment:
+      NODE_ENV: local
+      PORT: 3000
+      DATABASE_URL: postgresql://medilogix:medilogix@db:5432/medilogix?schema=public
+      CORS_ORIGIN: "*"
+      JWT_PASSPHRASE: ""
+      JWT_EXPIRES_IN: "1d"
+      # JWT_PRIVATE_KEY / JWT_PUBLIC_KEY are generated + exported at runtime
+      # by the CMD in Dockerfile.api (from ./keys, base64-encoded).
 
-volumes:
-  db-data:
-  pgadmin-data:
-  api-node-modules:
-  front-node-modules:
-
-networks:
-  medilogix-net:
-    driver: bridge
+  # ──────────────────────────────────────────────
+  # Angular Front-pharma
+  # ──────────────────────────────────────────────
+  front:
+    build:
+      context: ../front-pharma
+      dockerfile: ../.devcontainer/Dockerfile.front
+    networks:
+      - medilogix-net
+    ports:
+      - "4200:4200"
+    volumes:
+      - ../front-pharma:/app
+      - /app/node_modules
+    # Bootstrap environment.ts (idempotent) then run the dev server bound to
+    # 0.0.0.0 so the compose port publish reaches it from the host.
+    command: >
+      sh -c "
+        [ -f src/environments/environment.ts ] || cp src/environments/environment.ts.dist src/environments/environment.ts;
+        sed -i \"s#url: ''#url: 'http://localhost:3000'#\" src/environments/environment.ts;
+        exec npx ng serve --host 0.0.0.0 --port 4200 --poll 2000
+      "
