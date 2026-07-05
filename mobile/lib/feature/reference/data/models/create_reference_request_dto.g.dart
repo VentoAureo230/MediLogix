@@ -1,10 +1,11 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'login_response_dto.dart';
+part of 'create_reference_request_dto.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-LoginResponseDto _$LoginResponseDtoFromJson(Map<String, dynamic> json) =>
-    LoginResponseDto(token: json['token'] as String);
+Map<String, dynamic> _$CreateReferenceRequestDtoToJson(
+  CreateReferenceRequestDto instance,
+) => <String, dynamic>{'cip13': instance.cip13, 'quantity': ?instance.quantity};

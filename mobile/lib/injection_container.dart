@@ -6,6 +6,9 @@ import 'core/network/auth_interceptor.dart';
 import 'core/network/dio_client.dart';
 import 'core/services/token_storage_service.dart';
 import 'feature/authentication/authentication_dependencies.dart';
+import 'feature/order/order_dependencies.dart';
+import 'feature/reference/reference_dependencies.dart';
+import 'feature/scanner/scanner_dependencies.dart';
 
 /// Global service locator.
 ///
@@ -38,7 +41,7 @@ Future<void> initDependencies() async {
 
   // --- Features -------------------------------------------------------------
   registerAuthenticationFeature(sl);
-  //   registerOrderFeature(sl);
-  //   registerReferenceFeature(sl);
-  //   registerScannerFeature(sl);
+  registerOrderFeature(sl);
+  registerReferenceFeature(sl);
+  registerScannerFeature(sl); // depends on reference use cases
 }

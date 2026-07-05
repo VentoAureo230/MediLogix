@@ -7,7 +7,7 @@ part of 'order_user_dto.dart';
 // **************************************************************************
 
 OrderUserDto _$OrderUserDtoFromJson(Map<String, dynamic> json) => OrderUserDto(
-      id: (json['id'] as num).toInt(),
-      email: json['email'] as String,
-      role: json['role'] as String,
-    );
+  id: (json['id'] as num).toInt(),
+  email: json['email'] as String,
+  role: json['role'] as String,
+);

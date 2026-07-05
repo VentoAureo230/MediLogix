@@ -1,20 +1,17 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'order_dto.dart';
+part of 'reference_dto.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-OrderDto _$OrderDtoFromJson(Map<String, dynamic> json) => OrderDto(
+ReferenceDto _$ReferenceDtoFromJson(Map<String, dynamic> json) => ReferenceDto(
   id: (json['id'] as num).toInt(),
-  status: json['status'] as String,
+  name: json['name'] as String,
+  cip7: json['cip7'] as String,
+  cip13: json['cip13'] as String,
+  quantity: (json['quantity'] as num).toInt(),
   createdAt: DateTime.parse(json['created_at'] as String),
   updatedAt: DateTime.parse(json['updated_at'] as String),
-  user: json['user'] == null
-      ? null
-      : OrderUserDto.fromJson(json['user'] as Map<String, dynamic>),
-  references: (json['references'] as List<dynamic>?)
-      ?.map((e) => OrderLineDto.fromJson(e as Map<String, dynamic>))
-      .toList(),
 );

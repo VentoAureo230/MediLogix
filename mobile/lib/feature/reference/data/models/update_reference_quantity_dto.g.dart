@@ -1,10 +1,11 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'login_response_dto.dart';
+part of 'update_reference_quantity_dto.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-LoginResponseDto _$LoginResponseDtoFromJson(Map<String, dynamic> json) =>
-    LoginResponseDto(token: json['token'] as String);
+Map<String, dynamic> _$UpdateReferenceQuantityDtoToJson(
+  UpdateReferenceQuantityDto instance,
+) => <String, dynamic>{'quantity': instance.quantity};

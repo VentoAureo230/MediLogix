@@ -7,9 +7,9 @@ part of 'order_reference_ref_dto.dart';
 // **************************************************************************
 
 OrderReferenceRefDto _$OrderReferenceRefDtoFromJson(
-        Map<String, dynamic> json) =>
-    OrderReferenceRefDto(
-      id: (json['id'] as num).toInt(),
-      name: json['name'] as String,
-      cip13: json['cip13'] as String,
-    );
+  Map<String, dynamic> json,
+) => OrderReferenceRefDto(
+  id: (json['id'] as num).toInt(),
+  name: json['name'] as String,
+  cip13: json['cip13'] as String,
+);
