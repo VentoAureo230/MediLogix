@@ -6,5 +6,12 @@ class AppRoutes {
   const AppRoutes._();
 
   static const String login = '/login';
-  static const String home = '/home';
+
+  /// Default landing route after login. Matches the first tab of the shell.
+  static const String home = orders;
+
+  // Home shell branches
+  static const String orders = '/orders';
+  static const String references = '/references';
+  static const String scan = '/scan';
 }
