@@ -1,0 +1,48 @@
+FROM node:20-bullseye
+
+# System deps
+# - openssl: RS256 JWT keypair generation at container startup
+# - postgresql-client: pg_isready / psql for troubleshooting
+# - git, curl, ca-certificates: general dev workflow
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      git curl openssl postgresql-client ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# NestJS CLI (matches @nestjs/core v11 in package.json)
+RUN npm install -g @nestjs/cli
+
+WORKDIR /usr/src/app
+
+# Copy dependency files first (Docker layer caching)
+COPY package.json ./
+RUN npm install
+
+# Copy Prisma schema so `prisma generate` at startup can find it before the
+# code volume mount kicks in. Not strictly required (mount overlays before
+# CMD runs) but makes the image usable stand-alone.
+COPY prisma ./prisma/
+
+# Code is mounted as a volume at runtime — no COPY of source needed.
+# node_modules from the image is preserved via an anonymous volume in compose.
+
+EXPOSE 3000
+
+# Startup sequence, all idempotent so it's safe on every restart:
+# 1. Generate an RS256 JWT keypair in ./keys if missing (persisted via the
+#    api source bind-mount → survives container recreations)
+# 2. Export base64-encoded keys as JWT_PRIVATE_KEY / JWT_PUBLIC_KEY env vars
+#    (ConfigService's Joi schema requires them; atob() decodes at read time)
+# 3. Prisma generate + migrate deploy + seed (seed is idempotent — count-guards)
+# 4. Nest in watch mode
+CMD ["sh", "-c", "\
+  set -e; \
+  mkdir -p keys; \
+  [ -f keys/private.pem ] || openssl genrsa -out keys/private.pem 2048 2>/dev/null; \
+  [ -f keys/public.pem ] || openssl rsa -in keys/private.pem -pubout -out keys/public.pem 2>/dev/null; \
+  export JWT_PRIVATE_KEY=$(base64 -w 0 keys/private.pem); \
+  export JWT_PUBLIC_KEY=$(base64 -w 0 keys/public.pem); \
+  npx prisma generate; \
+  npx prisma migrate deploy; \
+  npx prisma db seed; \
+  exec npm run start:dev\
+"]

@@ -1,85 +1,67 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
-import 'package:mobile/service/api_singleton.dart';
-import 'package:mobile/widget/restart_widget.dart';
-import 'package:provider/provider.dart';
 
-import 'routing/app_route_config.dart';
+import 'config/routes/app_router.dart';
+import 'config/theme/app_theme.dart';
+import 'feature/authentication/presentation/bloc/authentication_bloc.dart';
+import 'injection_container.dart';
 
-class Main extends StatefulWidget {
-  const Main({super.key});
+Future<void> main() async {
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  @override
-  State<Main> createState() => _MainState();
+  await dotenv.load(fileName: '.env');
+  await initDependencies();
+
+  // Kick off the session hydration before the first frame so the router's
+  // redirect logic can immediately decide between /login and /home.
+  sl<AuthenticationBloc>().add(const AuthCheckRequested());
+
+  runApp(const MediLogixApp());
+
+  FlutterNativeSplash.remove();
 }
 
-class _MainState extends State<Main> {
-  final GoRouter router = appRouting();
+class MediLogixApp extends StatefulWidget {
+  const MediLogixApp({super.key});
+
+  @override
+  State<MediLogixApp> createState() => _MediLogixAppState();
+}
+
+class _MediLogixAppState extends State<MediLogixApp> {
+  late final AuthenticationBloc _authBloc = sl<AuthenticationBloc>();
+  late final GoRouter _router = buildAppRouter(_authBloc);
 
   @override
   Widget build(BuildContext context) {
-    return ScreenUtilInit(
-      designSize: const Size(374, 812),
-      minTextAdapt: true,
-      splitScreenMode: true,
-      builder: (context, child) {
-        return MaterialApp.router(
-          builder: (context, routerChild) {
-            return MediaQuery(
+    return BlocProvider<AuthenticationBloc>.value(
+      value: _authBloc,
+      child: ScreenUtilInit(
+        designSize: const Size(374, 812),
+        minTextAdapt: true,
+        splitScreenMode: true,
+        builder: (context, child) {
+          return MaterialApp.router(
+            debugShowCheckedModeBanner: false,
+            title: 'MediLogix',
+            theme: AppTheme.light,
+            routerConfig: _router,
+            builder: (context, routerChild) {
+              return MediaQuery(
                 data: MediaQuery.of(context).copyWith(
                   textScaler: const TextScaler.linear(1),
                 ),
-                child: routerChild!);
-          },
-          debugShowCheckedModeBanner: false,
-          // Uncomment the following lines to enable localization for translation
-          // supportedLocales: const [
-          //   Locale('en'),
-          //   Locale('fr'),
-          // ],
-          // locale: Provider.of<LanguageProvider>(context).currentLocale,
-          // localizationsDelegates: const [
-          //   AppLocalizations.delegate,
-          //   GlobalMaterialLocalizations.delegate,
-          //   GlobalWidgetsLocalizations.delegate,
-          //   GlobalCupertinoLocalizations.delegate,
-          // ],
-
-          routerConfig: router,
-          theme: ThemeData(
-            appBarTheme: const AppBarTheme(
-              backgroundColor: Colors.white,
-              elevation: 0,
-              iconTheme: IconThemeData(color: Colors.black),
-            ),
-            scaffoldBackgroundColor: Colors.white,
-            fontFamily: 'Poppins',
-          ),
-        );
-      },
+                child: routerChild!,
+              );
+            },
+          );
+        },
+      ),
     );
   }
-}
-
-class FakeProvider extends ChangeNotifier {
-}
-
-Future<void> main() async {
-  WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
-  FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
-  RestartWidget restartWidget = const RestartWidget(child: Main());
-  await ApiSingleton().init();
-  runApp(
-    MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (context) => FakeProvider()), // Empty provider to avoid bug
-      ],
-      child: restartWidget,
-    ),
-  );
-  FlutterNativeSplash.remove();
 }

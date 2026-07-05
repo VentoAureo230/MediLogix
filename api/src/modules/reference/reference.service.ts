@@ -1,37 +1,112 @@
-import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
-import { PrismaService } from "../../services";
-import { CreateReferenceDto } from "./dto/create-reference.dto";
-import { searchReferenceInCSV } from "./utils/utils";
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { PrismaService } from '../../services';
+import { CreateReferenceDto } from './dto/create-reference.dto';
+import { searchReferenceInCSV } from './utils/utils';
 import * as path from 'path';
-import { UpdateReferenceDto } from "./dto/update-reference.dto";
+import { UpdateReferenceDto } from './dto/update-reference.dto';
+import { NotificationService } from 'src/services/notification.service';
 
 @Injectable()
 export class ReferenceService {
-   constructor(private prisma: PrismaService) { }
+  constructor(
+    private prisma: PrismaService,
+    private notificationService: NotificationService,
+  ) {}
 
-   async getByCip13(cip13 : string) {
-      return await this.prisma.reference.findFirst({where : {cip13}});
-   }
+  async findAll(page = 1, limit = 15, maxQuantity?: number, search?: string) {
+    const safePage = page > 0 ? page : 1;
+    const safeLimit = limit > 0 ? limit : 15;
+    // When filtering low stock, show the most critical (lowest quantity) first.
+    const isAlert = maxQuantity !== undefined && !isNaN(maxQuantity);
+    const term = search?.trim();
 
-   async create(createReferenceDto : CreateReferenceDto) {
-      if(await this.prisma.reference.findFirst({where : {cip13 : createReferenceDto.cip13}}))
-         throw new HttpException(`Reference with CIP13 : ${createReferenceDto.cip13} is already existing`, HttpStatus.CONFLICT);
+    const conditions: Prisma.referenceWhereInput[] = [];
+    if (isAlert) {
+      conditions.push({ quantity: { lte: maxQuantity } });
+    }
+    if (term) {
+      conditions.push({
+        OR: [
+          { name: { contains: term, mode: 'insensitive' } },
+          { cip13: { contains: term } },
+        ],
+      });
+    }
+    const where: Prisma.referenceWhereInput = conditions.length
+      ? { AND: conditions }
+      : {};
 
-      // TODO Move path in .env
-      const foundReference = await searchReferenceInCSV(path.join(process.cwd(), 'data', 'medicaments.csv'), createReferenceDto.cip13);
+    const [data, total] = await this.prisma.$transaction([
+      this.prisma.reference.findMany({
+        where,
+        skip: (safePage - 1) * safeLimit,
+        take: safeLimit,
+        orderBy: isAlert ? { quantity: 'asc' } : { id: 'asc' },
+      }),
+      this.prisma.reference.count({ where }),
+    ]);
+    return { data, total, page: safePage, limit: safeLimit };
+  }
 
-      if(!foundReference)
-         throw new HttpException(`Reference with CIP13 : ${createReferenceDto.cip13} isnt existing`, HttpStatus.NOT_FOUND);
-      
-      return await this.prisma.reference.create({data : {...foundReference, quantity : createReferenceDto?.quantity ?? 0, created_at : new Date(), updated_at : new Date()}});
-   }
+  async getByCip13(cip13: string) {
+    return await this.prisma.reference.findFirst({ where: { cip13 } });
+  }
 
-   async updateQuantity(cip13 : string, updataReferenceDto : UpdateReferenceDto) {
-      const reference = await this.prisma.reference.findFirst({where : {cip13}});
+  async create(createReferenceDto: CreateReferenceDto) {
+    if (
+      await this.prisma.reference.findFirst({
+        where: { cip13: createReferenceDto.cip13 },
+      })
+    )
+      throw new HttpException(
+        `Reference with CIP13 : ${createReferenceDto.cip13} is already existing`,
+        HttpStatus.CONFLICT,
+      );
 
-      if(!reference)
-         throw new HttpException(`Reference with CIP13 : ${cip13} doesnt exist`, HttpStatus.NOT_FOUND);
+    // TODO Move path in .env
+    const foundReference = await searchReferenceInCSV(
+      path.join(process.cwd(), 'data', 'medicaments.csv'),
+      createReferenceDto.cip13,
+    );
 
-      return await this.prisma.reference.update({where : {id : reference.id}, data : {quantity : reference.quantity + updataReferenceDto.quantity, updated_at : new Date()}});
-   }
+    if (!foundReference)
+      throw new HttpException(
+        `Reference with CIP13 : ${createReferenceDto.cip13} isnt existing`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    const reference = await this.prisma.reference.create({
+      data: {
+        ...foundReference,
+        quantity: createReferenceDto?.quantity ?? 0,
+        created_at: new Date(),
+        updated_at: new Date(),
+      },
+    });
+
+    this.notificationService.notifyNewMedication(reference);
+
+    return reference;
+  }
+
+  async updateQuantity(cip13: string, updataReferenceDto: UpdateReferenceDto) {
+    const reference = await this.prisma.reference.findFirst({
+      where: { cip13 },
+    });
+
+    if (!reference)
+      throw new HttpException(
+        `Reference with CIP13 : ${cip13} doesnt exist`,
+        HttpStatus.NOT_FOUND,
+      );
+
+    return await this.prisma.reference.update({
+      where: { id: reference.id },
+      data: {
+        quantity: reference.quantity + updataReferenceDto.quantity,
+        updated_at: new Date(),
+      },
+    });
+  }
 }

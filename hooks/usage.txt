@@ -1,1 +1,0 @@
-Ajouter ces fichiers à votre dosser .git/hooks et donner leur les droits nécessaire : chmod +x hooks/commit-msg

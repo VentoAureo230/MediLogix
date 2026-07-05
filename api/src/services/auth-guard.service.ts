@@ -1,4 +1,11 @@
-import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  Injectable,
+  CanActivate,
+  ExecutionContext,
+  UnauthorizedException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import * as jwt from 'jsonwebtoken';
 import { JwtPayload } from 'jsonwebtoken';
 import { ConfigService } from './config.service';
@@ -10,7 +17,7 @@ export class AuthGuardService implements CanActivate {
   constructor(
     private configService: ConfigService,
     private prisma: PrismaService,
-  ) { }
+  ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -23,7 +30,11 @@ export class AuthGuardService implements CanActivate {
     const token = authHeader.split(' ')[1];
     const decodedToken = await this.validateToken(token);
 
-    if (!decodedToken || typeof decodedToken === 'string' || !decodedToken.userId) {
+    if (
+      !decodedToken ||
+      typeof decodedToken === 'string' ||
+      !decodedToken.userId
+    ) {
       throw new UnauthorizedException('Invalid token or userId missing');
     }
 
@@ -65,13 +76,13 @@ export class AuthGuardService implements CanActivate {
   // Example of a function to validate an admin user
   async validateAdmin(userId: string): Promise<void> {
     const user = await this.prisma.user.findFirst({
-      where: {  },
+      where: {},
       select: {
         email: true,
         role: true,
       },
     });
-    
+
     if (!user) {
       throw new UnauthorizedException('User not found');
     }

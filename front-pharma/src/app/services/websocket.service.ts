@@ -1,49 +1,44 @@
 import { Injectable } from '@angular/core';
+import { environment } from '../../environments/environment';
 
 @Injectable({
-    providedIn: 'root'
+  providedIn: 'root',
 })
 export class WebSocketService {
-    private socket: WebSocket;
+  private socket?: WebSocket;
+  private listeners = new Set<(data: any) => void>();
 
-    constructor() {
-        this.socket = new WebSocket('ws://localhost:3000');
-
-        this.socket.onopen = () => {
-            console.log('WebSocket connection established');
-        };
-
-        this.socket.onclose = () => {
-            console.log('WebSocket connection closed');
-        };
-
-        this.socket.onmessage = (event) => {
-            console.log('Message from server:', event);
-            console.log('Raw message data:', event.data);
-            const message = JSON.parse(event.data);
-            if (message.type === 'newMedication') {
-                console.log('New medication:', message.data);
-            }
-        };
+  private connect(): void {
+    if (
+      this.socket &&
+      (this.socket.readyState === WebSocket.OPEN ||
+        this.socket.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
     }
 
-    public onNewMedication(callback: (data: any) => void) {
-        console.log('Listening for new medications');
-        this.socket.addEventListener('message', (event) => {
-            console.log('Received message:', event.data);
-            try {
-                const message = JSON.parse(event.data);
-                if (message.type === 'newMedication') {
-                    console.log('Callback with new medication data:', message.data);
-                    callback(message.data);
-                }
-            } catch (error) {
-                console.error('Error parsing message:', error);
-            }
-        });
-    }
+    const url = environment.api.url.replace(/^http/, 'ws');
+    this.socket = new WebSocket(url);
 
-    public disconnect() {
-        this.socket.close();
-    }
+    this.socket.onmessage = (event) => {
+      try {
+        const message = JSON.parse(event.data);
+        if (message.type === 'newMedication') {
+          this.listeners.forEach((cb) => cb(message.data));
+        }
+      } catch (error) {
+        console.error('WebSocket parse error:', error);
+      }
+    };
+  }
+
+  /**
+   * Subscribe to `newMedication` events. Returns an unsubscribe function that
+   * removes only this listener — the shared socket stays open for others.
+   */
+  onNewMedication(callback: (data: any) => void): () => void {
+    this.connect();
+    this.listeners.add(callback);
+    return () => this.listeners.delete(callback);
+  }
 }

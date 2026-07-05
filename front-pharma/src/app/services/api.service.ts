@@ -1,30 +1,28 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { Observable, tap } from 'rxjs';
+import { environment } from '../../environments/environment';
+import { LoginResponse, Role } from '../models/reference.model';
+import { AuthService } from './auth.service';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class ApiService {
-  private apiUrl = 'http://localhost:3000/authentication';
+  private authUrl = `${environment.api.url}/authentication`;
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private auth: AuthService,
+  ) {}
 
-  login(email:string, password: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/login`, { email, password });
+  login(email: string, password: string): Observable<LoginResponse> {
+    return this.http
+      .post<LoginResponse>(`${this.authUrl}/login`, { email, password })
+      .pipe(tap((res) => this.auth.setToken(res.token)));
   }
 
-  register(email: string, password: string, firstName: string, lastName: string): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/register`, { email, password, firstName, lastName });
-  }
-
-  // Exemple de méthode GET pour obtenir des données
-  getData(): Observable<any> {
-    return this.http.get<any>(`${this.apiUrl}/user/users`);
-  }
-
-  // Exemple de méthode POST pour envoyer des données
-  postData(data: any): Observable<any> {
-    return this.http.post<any>(`${this.apiUrl}/endpoint`, data);
+  register(email: string, password: string, role: Role): Observable<any> {
+    return this.http.post<any>(`${this.authUrl}`, { email, password, role });
   }
 }

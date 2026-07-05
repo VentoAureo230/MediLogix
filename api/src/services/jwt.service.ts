@@ -11,10 +11,12 @@ export class JwtService {
       key: this.configService.jwtPrivateKey,
       //passphrase: this.configService.jwtPassphrase,
     };
-    return jwt.sign({ userId }, privateKey, {
-      expiresIn: this.configService.jwtExpiresIn,
+    const options: jwt.SignOptions = {
+      expiresIn: this.configService
+        .jwtExpiresIn as jwt.SignOptions['expiresIn'],
       algorithm: 'RS256',
-    });
+    };
+    return jwt.sign({ userId }, privateKey, options);
   }
 
   async generateRefreshToken(userId: string) {
