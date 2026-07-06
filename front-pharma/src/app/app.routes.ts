@@ -3,6 +3,7 @@ import { LoginComponent } from './components/login/login.component';
 import { HomeComponent } from './components/home/home.component';
 import { OrderComponent } from './components/order/order.component';
 import { StoreComponent } from './components/store/store.component';
+import { MapComponent } from './components/map/map.component';
 import { authGuard } from './guards/auth.guard';
 
 export const routes: Routes = [
@@ -11,4 +12,5 @@ export const routes: Routes = [
     { path: 'home', component: HomeComponent, canActivate: [authGuard] },
     { path: 'order', component: OrderComponent, canActivate: [authGuard] },
     { path: 'store', component: StoreComponent, canActivate: [authGuard] },
+    { path: 'map', component: MapComponent, canActivate: [authGuard] },
   ];
