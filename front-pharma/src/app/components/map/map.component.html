@@ -1,0 +1,96 @@
+<div class="container mx-auto p-4 bg-base-200">
+    <h1 class="text-xl font-semibold mb-4">Plan de l'espace de stockage</h1>
+
+    <div class="mb-4">
+        <input type="text" [(ngModel)]="searchTerm"
+            placeholder="Localiser un item par nom ou CIP13..."
+            class="w-full md:w-96 px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+    </div>
+
+    <div *ngIf="isLoading" class="text-center mb-4">Chargement...</div>
+
+    <div class="flex flex-col lg:flex-row gap-4">
+        <!-- Plan -->
+        <div class="bg-white shadow-lg rounded-lg p-4 flex-1">
+            <svg viewBox="0 0 800 500" class="w-full h-auto">
+                <!-- Salles -->
+                <g *ngFor="let room of rooms">
+                    <rect [attr.x]="room.x" [attr.y]="room.y" [attr.width]="room.width" [attr.height]="room.height"
+                        fill="#f9fafb" stroke="#374151" stroke-width="3" rx="4" />
+                    <text [attr.x]="room.x + 12" [attr.y]="room.y + 24" class="text-sm" fill="#374151"
+                        font-size="15" font-weight="600">{{ room.name }}</text>
+                </g>
+
+                <!-- Étagères / unités de stockage -->
+                <g *ngFor="let unit of units" (click)="selectUnit(unit)" class="cursor-pointer">
+                    <rect [attr.x]="unit.x" [attr.y]="unit.y" [attr.width]="unit.width" [attr.height]="unit.height"
+                        [attr.fill]="unitFill(unit)"
+                        [attr.stroke]="selectedUnit?.id === unit.id ? '#2563eb' : (isHighlighted(unit.id) ? '#f97316' : '#6b7280')"
+                        [attr.stroke-width]="selectedUnit?.id === unit.id || isHighlighted(unit.id) ? 4 : 1.5"
+                        rx="3" />
+                    <text [attr.x]="unit.x + unit.width / 2" [attr.y]="unit.y + unit.height / 2" text-anchor="middle"
+                        dominant-baseline="middle" font-size="14" font-weight="600" fill="#1f2937">{{ unit.id }}</text>
+                    <text [attr.x]="unit.x + unit.width / 2" [attr.y]="unit.y + unit.height / 2 + 18" text-anchor="middle"
+                        dominant-baseline="middle" font-size="11" fill="#4b5563">{{ itemsOf(unit.id).length }} réf.</text>
+                </g>
+            </svg>
+
+            <!-- Légende -->
+            <div class="flex flex-wrap gap-4 mt-2 text-sm text-gray-600">
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-green-300 inline-block"></span> En stock</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-yellow-200 inline-block"></span> Stock faible</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-red-300 inline-block"></span> Rupture</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded bg-gray-200 inline-block"></span> Vide</span>
+                <span class="flex items-center gap-1"><span class="w-3 h-3 rounded border-2 border-orange-500 inline-block"></span> Résultat de recherche</span>
+            </div>
+        </div>
+
+        <!-- Panneau de détail -->
+        <div class="bg-white shadow-lg rounded-lg p-4 w-full lg:w-96">
+            <!-- Résultats de recherche -->
+            <div *ngIf="searchTerm.trim()">
+                <h2 class="text-lg font-semibold mb-2">Résultats de recherche</h2>
+                <hr class="border-black">
+                <ul class="mt-4 space-y-2">
+                    <li *ngFor="let item of searchMatches" class="flex justify-between items-center text-sm">
+                        <span>{{ item.name }}</span>
+                        <span class="bg-orange-200 text-orange-700 px-2 py-1 rounded">{{ unitLabel(item.unitId) }}</span>
+                    </li>
+                    <li *ngIf="searchMatches.length === 0" class="text-center text-gray-400 py-2">Aucun item trouvé</li>
+                </ul>
+            </div>
+
+            <!-- Contenu de l'unité sélectionnée -->
+            <div *ngIf="!searchTerm.trim()">
+                <h2 class="text-lg font-semibold mb-2">
+                    {{ selectedUnit ? selectedUnit.label + ' — ' + selectedUnit.room : 'Sélectionnez une étagère' }}
+                </h2>
+                <hr class="border-black">
+                <table *ngIf="selectedUnit" class="table-auto w-full mt-4">
+                    <thead>
+                        <tr>
+                            <th class="text-left">Nom</th>
+                            <th>Quantité</th>
+                            <th>Statut</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr *ngFor="let item of selectedItems">
+                            <td class="py-1">{{ item.name }}</td>
+                            <td class="text-center px-4">{{ item.quantity }}</td>
+                            <td class="text-center px-4">
+                                <span [ngClass]="getStockStatusClass(item.statut)" class="px-2 py-1 rounded text-sm">{{ item.statut }}</span>
+                            </td>
+                        </tr>
+                        <tr *ngIf="selectedItems.length === 0">
+                            <td colspan="3" class="text-center text-gray-400 py-2">Étagère vide</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p *ngIf="!selectedUnit" class="text-gray-400 mt-4 text-sm">
+                    Cliquez sur une étagère du plan pour voir les items qui y sont stockés.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
